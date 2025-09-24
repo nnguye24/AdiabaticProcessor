@@ -4,6 +4,34 @@
 // NETLIST TIME: Sep 19 16:13:51 2025
 `timescale 1ns / 1ns 
 
+`include "../tranif/custom_tranif.sv"
+
+`include "../src/inv_irr.sv"
+`include "../src/inv_fo64_irr.sv"
+`include "../src/nand3b_irr.sv"
+`include "../src/mux2to1_control.sv"
+`include "../src/phas_enH1.sv"
+`include "../src/nor3b_irr.sv"
+`include "../src/inv_fo64.sv"
+`include "../src/nor2b_fo4_irr.sv"
+`include "../src/nand3b.sv"
+`include "../src/nor2b_fo4.sv"
+`include "../src/flipflop2b.sv"
+`include "../src/nand2b_fo4_irr.sv"
+`include "../src/phasedetector.sv"
+`include "../src/phasedetFO.sv"
+`include "../src/inv_fo4_irr.sv"
+`include "../src/inv_fo16_irr.sv"
+`include "../src/inv_fo16.sv"
+`include "../src/inv.sv"
+`include "../src/nand2b_fo4.sv"
+`include "../src/nor2b.sv"
+`include "../src/nand2b.sv"
+`include "../src/nor4b.sv"
+`include "../src/nor3b.sv"
+`include "../src/nand2b_irr.sv"
+`include "../src/nand3b_fo4.sv"
+
 module control_unit ( Nout[0], Nout[1], Nout[2], Nout[3], Nout[4],
      Nout[5], Nout[6], Nout[7], ReadEn, S[0], S[1], S[2], S[3], S[4],
      S[5], S[6], S[7], WriteEn, out_ALUCont0, out_ALUCont1,
