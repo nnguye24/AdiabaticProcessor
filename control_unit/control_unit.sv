@@ -4,7 +4,7 @@
 // NETLIST TIME: Sep 19 16:13:51 2025
 `timescale 1ns / 1ns 
 
-`include "../tranif/custom_tranif.sv"
+`include "custom_tranif.sv"
 
 `include "../src/inv_irr.sv"
 `include "../src/inv_fo64_irr.sv"
