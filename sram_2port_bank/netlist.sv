@@ -1,8 +1,9 @@
 
 // timscale directive file
-`include "/afs/crc.nd.edu/user/g/gsnider/MIPS25/V1.10.513/VirtuosoOA/examples/sram_2port_bank_run1/hdlFilesDir/timescaleF"
+//`include "/afs/crc.nd.edu/user/g/gsnider/MIPS25/V1.10.513/VirtuosoOA/examples/sram_2port_bank_run1/hdlFilesDir/timescaleF"
 
-
+`include "custom_tranif.sv"
+`timescale 1ns / 1ns 
 // Verilog HDL and netlist files of
 // "MIPS25 sram_2port_bank schematic"
 
@@ -11,7 +12,7 @@
 // Library - MIPS25, Cell - sram_2port_writedriver, View - schematic
 // LAST TIME SAVED: Aug  5 16:05:12 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_2port_writedriver ( bitA, bitnotA, clkneg1, clkneg2,
      clkpos1, clkpos2, in, vdd, vss, write );
@@ -38,7 +39,7 @@ endmodule
 // Library - MIPS25, Cell - sram1b_2port, View - schematic
 // LAST TIME SAVED: Aug  5 16:07:17 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram1b_2port ( bitA, bitnotA, bitnotB, PEn, PEnnot, srclkneg,
      srclkpos, vdd, vss, wordA, wordB );
@@ -70,7 +71,7 @@ endmodule
 // Library - MIPS25, Cell - sram_2port_sensor, View - schematic
 // LAST TIME SAVED: Jul  1 11:17:36 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_2port_sensor ( outA, bitnot, clkneg1, clkpos1, vdd, vss );
 
@@ -92,7 +93,7 @@ endmodule
 // Library - MIPS25, Cell - sram1b_2port_reg0, View - schematic
 // LAST TIME SAVED: Jul  4 07:38:07 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram1b_2port_reg0 ( bitnotA, bitnotB, vdd, vss, wordA, wordB );
 
@@ -114,7 +115,7 @@ endmodule
 // Library - MIPS25, Cell - sram_nand2b, View - schematic
 // LAST TIME SAVED: Jun 19 09:26:03 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_nand2b ( out, a, b, clkneg, clkpos, vdd, vss );
 
@@ -138,7 +139,7 @@ endmodule
 // Library - MIPS25, Cell - sram_invPhi2, View - schematic
 // LAST TIME SAVED: Jul  4 17:22:32 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_invPhi2 ( out, clkneg, clkpos, in, vdd, vss );
 
@@ -160,7 +161,7 @@ endmodule
 // Library - MIPS25, Cell - sram_nand3b, View - schematic
 // LAST TIME SAVED: Jun 16 21:06:07 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_nand3b ( out, a, b, c, clkneg, clkpos, vdd, vss );
 
@@ -186,7 +187,7 @@ endmodule
 // Library - MIPS25, Cell - sram_nor2b_fo4_irr, View - schematic
 // LAST TIME SAVED: Jul  7 10:11:46 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_nor2b_fo4_irr ( out, a, b, vdd, vss );
 
@@ -210,7 +211,7 @@ endmodule
 // Library - MIPS25, Cell - sram_inv_irr, View - schematic
 // LAST TIME SAVED: Jul 11 07:19:55 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_inv_irr ( out, in, vdd, vss );
 
@@ -232,7 +233,7 @@ endmodule
 // Library - MIPS25, Cell - sram_nor2bPhi2, View - schematic
 // LAST TIME SAVED: Jun 30 11:03:34 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_nor2bPhi2 ( out, a, b, clkneg, clkpos, vdd, vss );
 
@@ -256,7 +257,7 @@ endmodule
 // Library - MIPS25, Cell - sram_decoderB_GLS2, View - schematic
 // LAST TIME SAVED: Aug 28 08:59:16 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_decoderB_GLS2 ( WordB0, WordB1, ReadEn, clkneg, clkneg2,
      clkneg3, clkpos, clkpos2, clkpos3, in0B, in0BBar, in1B, in2B,
@@ -290,7 +291,7 @@ endmodule
 // Library - MIPS25, Cell - inv_fo4, View - schematic
 // LAST TIME SAVED: Jun 16 20:25:19 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module inv_fo4 ( out, clkneg, clkpos, in, vdd, vss );
 
@@ -318,7 +319,7 @@ endmodule
 // Library - MIPS25, Cell - sram_nor3b, View - schematic
 // LAST TIME SAVED: Jul 10 08:56:15 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_nor3b ( out, a, b, c, clkneg, clkpos, vdd, vss );
 
@@ -344,7 +345,7 @@ endmodule
 // Library - MIPS25, Cell - sram_nor2b_irr, View - schematic
 // LAST TIME SAVED: Jul  7 10:18:37 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_nor2b_irr ( out, a, b, vdd, vss );
 
@@ -368,7 +369,7 @@ endmodule
 // Library - MIPS25, Cell - sram_decoderA_GLS2, View - schematic
 // LAST TIME SAVED: Aug 28 08:59:04 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_decoderA_GLS2 ( PenOut0, PenOut0Bar, PenOut1, PenOut1Bar,
      WordA0, WordA1, ReadEn, RegWrtBar, WriteEn, clkneg, clkneg2,
@@ -409,7 +410,7 @@ endmodule
 // Library - MIPS25, Cell - sram_2port_bank, View - schematic
 // LAST TIME SAVED: Aug 28 09:37:36 2025
 // NETLIST TIME: Sep 29 18:41:10 2025
-`timescale 1ns / 1ns 
+
 
 module sram_2port_bank ( outA_15_, outA_14_, outA_13_, outA_12_,
      outA_11_, outA_10_, outA_9_, outA_8_, outA_7_, outA_6_, outA_5_,
