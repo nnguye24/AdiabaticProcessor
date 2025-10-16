@@ -21,6 +21,7 @@ module sram_array(
 
 reg [15:0] sram [0:31];
 // sram[3] would access the 4th row, 
+
 // array of wordA/B is a 1hot thing, choses 1 of the 32 rows
 // but accessing each sram cell in the register array is done by index
 // so we need to convert the 1hot to index
