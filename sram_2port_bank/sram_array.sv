@@ -1,13 +1,13 @@
 module sram_array(
-    output [15:0] outA,
-    output [15:0] outB,
+    output reg [15:0] outA,
+    output reg [15:0] outB,
     input [31:0] wordA,
     input [31:0] wordB,
     input ReadEn,
     input WriteEn,
     input [15:0] in,
     input srclkneg,
-    input srclkpos,
+    input srclkpos
 );
 
 // need to define the memory unit
@@ -46,7 +46,7 @@ always @(*) begin
         outB = sram[conv];
     end
 
-    if(writeEn) begin
+    if(WriteEn) begin
         sram[conv] <= in;
     end
 end
