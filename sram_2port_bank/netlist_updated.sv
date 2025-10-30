@@ -479,11 +479,11 @@ sram_2port_writedriver I2130 ( net3822, net1494, clkneg_2_, clkneg_3_,
 sram_2port_writedriver I2129 ( net3161, net2520, clkneg_2_, clkneg_3_,
      clkpos_2_, clkpos_3_, in_14_, vdd, vss, WriteEn);
 
-sram_array array(outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
+sram_array array({outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
      outA_9_, outA_8_, outA_7_, outA_6_, outA_5_, outA_4_, outA_3_,
-     outA_2_, outA_1_, outA_0_, outB_15_, outB_14_, outB_13_, outB_12_,
+     outA_2_, outA_1_, outA_0_}, {outB_15_, outB_14_, outB_13_, outB_12_,
      outB_11_, outB_10_, outB_9_, outB_8_, outB_7_, outB_6_, outB_5_,
-     outB_4_, outB_3_, outB_2_, outB_1_, outB_0_,
+     outB_4_, outB_3_, outB_2_, outB_1_, outB_0_},
     // concatenate all outputs from decoders, word determines address, 1 hot
      // wordA
      {net720,net59,net691,net57,net662,net56,net633,net52,net604,net51,net572,net50,
@@ -494,10 +494,11 @@ sram_array array(outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
      net89,net836,net85,net814,net84,net792,net82,net770,net79,net748,
      net75,net591,net71,net147,net68,net114, net67,net77,net66,net30,net63}, 
 
-     ReadEn, WriteEn, in_15_, in_14_, in_13_, in_12_, in_11_, in_10_, in_9_, in_8_,
-     in_7_, in_6_, in_5_, in_4_, in_3_, in_2_, in_1_, in_0_, srclkneg,
+     ReadEn, WriteEn, {in_15_, in_14_, in_13_, in_12_, in_11_, in_10_, in_9_, in_8_,
+     in_7_, in_6_, in_5_, in_4_, in_3_, in_2_, in_1_, in_0_}, srclkneg,
      srclkpos
 );
+
 sram_2port_sensor I2127 ( outB_0_, net207, clkneg_5_, clkpos_5_, vdd,
      vss);
 sram_2port_sensor I2126 ( outB_1_, net538, clkneg_5_, clkpos_5_, vdd,
@@ -731,4 +732,60 @@ sram_decoderA_GLS2 I2160 ( net72, net70, net37, net35, net275, net7,
 endmodule
 
 
-// End HDL models
+// End extracted HDL models
+
+// Behavioral Model for SRAM array
+module sram_array(
+    output reg [15:0] outA,
+    output reg [15:0] outB,
+    input [31:0] wordA,
+    input [31:0] wordB,
+    input ReadEn,
+    input WriteEn,
+    input [15:0] in,
+    input srclkneg,
+    input srclkpos
+);
+
+// need to define the memory unit
+// 5 bit addressable = 32 addresses
+// each address has 16 bits of data
+
+// 32 word lines
+// each word is an address 
+
+// to connect decoder to this we would do concatenating that wordA0 and wordA1 with each two rows
+
+reg [15:0] sram [0:31];
+// sram[3] would access the 4th row, 
+
+// array of wordA/B is a 1hot thing, choses 1 of the 32 rows
+// but accessing each sram cell in the register array is done by index
+// so we need to convert the 1hot to index
+
+reg [4:0] conv; // used to convert 1hot to index
+// we will loop through the 32 bits of wordA and wordB, if it is high we will set conv to that index
+integer i;
+
+always @(*) begin
+    conv = 5'b00000;
+    for (i = 0; i < 32; i = i + 1) begin
+        if (wordA[i]) begin
+            conv = i[4:0];
+        end
+    end
+end
+
+always @(*) begin
+    // writing to SRAM 
+    if (ReadEn) begin
+        outA = sram[conv];
+        outB = sram[conv];
+    end
+
+    if(WriteEn) begin
+        sram[conv] <= in;
+    end
+end
+
+endmodule
