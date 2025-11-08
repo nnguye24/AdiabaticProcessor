@@ -1,5 +1,6 @@
 `include "../../bennettclock/bennettClock.sv"
-
+// maybe use the old bennett clock?
+`include "../../bennettclock/bennettClock_square.sv"
 
 module sram_bank_tb();
 supply1 vdd;
@@ -10,13 +11,13 @@ localparam WIDTH = 10;
 // Clock Related Signal
 reg clk;
 reg reset;
-wire [WIDTH-1:0] clkneg;
-wire [WIDTH-1:0] clkpos;
-reg Mclk;
+wire logic [WIDTH-1:0] clkneg;
+wire logic [WIDTH-1:0] clkpos;
+wire Mclk;
 wire instFlag;
 
 bennett_clock #(
-    .PHASES(WIDTH)
+    .PHASES(WIDTH)   // PHASES(new), WIDTH(square)
 ) bennett (
     .clk(clk),
     .reset(reset),
@@ -26,7 +27,6 @@ bennett_clock #(
 );
 
 assign clkneg = ~clkpos;
-
 
 // SRAM bank related signals
 // Wires for outputs
@@ -47,8 +47,8 @@ sram_2port_bank dut (
     Addr_A[4], Addr_A[3], Addr_A[2], Addr_A[1], Addr_A[0],  //a3
     Addr_B[4], Addr_B[3], Addr_B[2], Addr_B[1], Addr_B[0],  // instruction
     ReadEn, RegWrtBar, WriteEn, // control signals
-    clkneg[4], clkneg[5], clkneg[6], clkneg[7], clkneg[9],
-    clkpos[4], clkpos[5], clkpos[6], clkpos[7], clkpos[9],
+    clkneg[4], clkneg[5], clkneg[6], clkneg[7], clkneg[9], //5-8, then 10
+    clkpos[4], clkpos[5], clkpos[6], clkpos[7], clkpos[9], // inside the definition they go 1-5
     in[15], in[14], in[13], in[12], in[11], in[10], in[9], in[8], in[7], in[6], in[5], in[4], in[3], in[2], in[1], in[0],
     srclkneg, srclkpos, vdd, vss
 );

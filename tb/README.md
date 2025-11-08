@@ -10,7 +10,7 @@ gtkwave control.vcd
 
 ### For sram_2port_bank
 ```
-iverilog -g2012 -I ../../tranif -o sram_bank ../../sram_2port_bank/netlist.sv sram_2port_bank_tb.sv
+iverilog -g2012 -I ../../tranif -o sram_bank ../../sram_2port_bank/netlist_updated.sv sram_2port_bank_tb.sv
 vvp sram_bank
 gtkwave sram_bank.vcd
 ```
