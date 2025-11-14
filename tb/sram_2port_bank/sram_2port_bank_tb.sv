@@ -16,6 +16,10 @@ wire logic [WIDTH-1:0] clkpos;
 wire Mclk;
 wire instFlag;
 
+// for bennett clock input tester
+wire [4:0] clkpos_out;
+wire [4:0] clkneg_out;
+
 bennett_clock #(
     .PHASES(WIDTH)   // PHASES(new), WIDTH(square)
 ) bennett (
@@ -40,6 +44,20 @@ wire RegWrtBar; // comes phase 7
 reg [15:0] in;
 wire srclkneg, srclkpos;
 
+clocktest clktester(
+    .clkneg_1_(clkneg[4]),
+    .clkneg_2_(clkneg[5]),  
+    .clkneg_3_(clkneg[6]),
+    .clkneg_4_(clkneg[7]),
+    .clkneg_5_(clkneg[9]),
+    .clkpos_1_(clkpos[4]),
+    .clkpos_2_(clkpos[5]),
+    .clkpos_3_(clkpos[6]),
+    .clkpos_4_(clkpos[7]),
+    .clkpos_5_(clkpos[9]),
+    .clkpos_out(clkpos_out),
+    .clkneg_out(clkneg_out)
+);
 
 sram_2port_bank dut (
     outA[15], outA[14], outA[13], outA[12], outA[11], outA[10], outA[9], outA[8], outA[7], outA[6], outA[5], outA[4], outA[3], outA[2], outA[1], outA[0],
@@ -71,8 +89,10 @@ initial begin
     reset = 1;
     #10;
     reset = 0;
-    ReadEn = 0;
+    ReadEn = 1;
     WriteEn = 0;
+    #10
+    ReadEn = 0;
     // Write operation
     @(posedge clkpos[2]);
     Addr_A = 5'b00001;       
@@ -92,6 +112,14 @@ initial begin
     ReadEn = 1;
     @(posedge clkpos[8]);
     ReadEn = 0;
+
+    @(posedge clkpos[2]);
+    Addr_A = 5'b00011;
+    @(posedge clkpos[6]);
+    ReadEn = 1;
+    @(posedge clkpos[8]);
+    ReadEn = 0;
+    
     #400;
     $finish;
 end

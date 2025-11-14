@@ -26,15 +26,20 @@ reg [15:0] sram [0:31];
 // but accessing each sram cell in the register array is done by index
 // so we need to convert the 1hot to index
 
-reg [4:0] conv; // used to convert 1hot to index
+reg [4:0] convA; // used to convert 1hot to index
+reg [4:0] convB; // used to convert 1hot to index
 // we will loop through the 32 bits of wordA and wordB, if it is high we will set conv to that index
 integer i;
 
 always @(*) begin
-    conv = 5'b00000;
+    convA = 5'b00000;
+    convB = 5'b00000;
     for (i = 0; i < 32; i = i + 1) begin
         if (wordA[i]) begin
-            conv = i[4:0];
+            convA = i[4:0];
+        end
+        if (wordB[i]) begin
+            convB = i[4:0];
         end
     end
 end
@@ -42,12 +47,13 @@ end
 always @(*) begin
     // writing to SRAM 
     if (ReadEn) begin
-        outA = sram[conv];
-        outB = sram[conv];
+        outA = sram[convA];
+        outB = sram[convB];
     end
 
     if(WriteEn) begin
-        sram[conv] <= in;
+        sram[convA] <= in;
+        sram[convB] <= in;
     end
 end
 

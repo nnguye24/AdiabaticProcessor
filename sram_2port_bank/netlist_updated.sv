@@ -445,6 +445,7 @@ specify
     specparam CDS_CELLNAME = "sram_2port_bank";
     specparam CDS_VIEWNAME = "schematic";
 endspecify
+/* Do not need write drivers in Verilog, as write drivers are for the analog stuff
 
 sram_2port_writedriver I2143 ( net83, net208, clkneg_2_, clkneg_3_,
      clkpos_2_, clkpos_3_, in_0_, vdd, vss, WriteEn);
@@ -478,7 +479,7 @@ sram_2port_writedriver I2130 ( net3822, net1494, clkneg_2_, clkneg_3_,
      clkpos_2_, clkpos_3_, in_13_, vdd, vss, WriteEn);
 sram_2port_writedriver I2129 ( net3161, net2520, clkneg_2_, clkneg_3_,
      clkpos_2_, clkpos_3_, in_14_, vdd, vss, WriteEn);
-
+*/
 sram_array array({outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
      outA_9_, outA_8_, outA_7_, outA_6_, outA_5_, outA_4_, outA_3_,
      outA_2_, outA_1_, outA_0_}, {outB_15_, outB_14_, outB_13_, outB_12_,
@@ -499,6 +500,7 @@ sram_array array({outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
      srclkpos
 );
 
+/* We don't need sensors in Verilog, as they are for the analog stuff 
 sram_2port_sensor I2127 ( outB_0_, net207, clkneg_5_, clkpos_5_, vdd,
      vss);
 sram_2port_sensor I2126 ( outB_1_, net538, clkneg_5_, clkpos_5_, vdd,
@@ -563,7 +565,7 @@ sram_2port_sensor I2072 ( outA_7_, net32, clkneg_5_, clkpos_5_, vdd,
      vss);
 sram_2port_sensor I2075 ( outA_4_, net109, clkneg_5_, clkpos_5_, vdd,
      vss);
-     
+*/
 // sram1b_2port_reg0 I1583 ( net2000, net375, vdd, vss, net720, net968);
 // sram1b_2port_reg0 I1679 ( net2302, net355, vdd, vss, net720, net968);
 // sram1b_2port_reg0 I1647 ( net1494, net474, vdd, vss, net720, net968);
@@ -763,15 +765,20 @@ reg [15:0] sram [0:31];
 // but accessing each sram cell in the register array is done by index
 // so we need to convert the 1hot to index
 
-reg [4:0] conv; // used to convert 1hot to index
+reg [4:0] convA; // used to convert 1hot to index
+reg [4:0] convB; // used to convert 1hot to index
 // we will loop through the 32 bits of wordA and wordB, if it is high we will set conv to that index
 integer i;
 
 always @(*) begin
-    conv = 5'b00000;
+    convA = 5'b00000;
+    convB = 5'b00000;
     for (i = 0; i < 32; i = i + 1) begin
         if (wordA[i]) begin
-            conv = i[4:0];
+            convA = i[4:0];
+        end
+        if (wordB[i]) begin
+            convB = i[4:0];
         end
     end
 end
@@ -779,13 +786,28 @@ end
 always @(*) begin
     // writing to SRAM 
     if (ReadEn) begin
-        outA = sram[conv];
-        outB = sram[conv];
+        outA = sram[convA];
+        outB = sram[convB];
     end
 
     if(WriteEn) begin
-        sram[conv] <= in;
+        sram[convA] <= in;
+        sram[convB] <= in;
     end
 end
+
+endmodule
+
+// writing test module for bennett clocks going in
+
+module clocktest(
+     input clkneg_1_, clkneg_2_, clkneg_3_, clkneg_4_, clkneg_5_,
+     input clkpos_1_, clkpos_2_, clkpos_3_, clkpos_4_, clkpos_5_,
+     output [4:0] clkpos_out, 
+     output [4:0] clkneg_out
+);
+
+assign clkneg_out = {clkneg_5_, clkneg_4_, clkneg_3_, clkneg_2_, clkneg_1_};
+assign clkpos_out = {clkpos_5_, clkpos_4_, clkpos_3_, clkpos_2_, clkpos_1_};
 
 endmodule
