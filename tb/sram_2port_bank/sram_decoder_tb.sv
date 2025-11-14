@@ -15,7 +15,7 @@ wire [9:0] clkneg;
 reg Mclk;
 wire instFlag;
 
-bennett_clock #(.PHASES(10)) bennett (
+bennett_clock_square #(.WIDTH(10)) bennett (
     .clk(clk),
     .reset(reset),
     .clkp(clkpos),

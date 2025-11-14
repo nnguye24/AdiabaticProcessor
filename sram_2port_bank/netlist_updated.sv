@@ -803,7 +803,7 @@ endmodule
 module deviceTester(
      // inverter
      input in,
-     output [1:0] out,
+     output out,
      // decoder
      input [4:0] addr,
      output word1,
@@ -825,18 +825,30 @@ module deviceTester(
      input vss
 );
 
+wire [4:0] addr_bar;
+
 assign clkneg_out = {clkneg_5_, clkneg_4_, clkneg_3_, clkneg_2_, clkneg_1_};
 assign clkpos_out = {clkpos_5_, clkpos_4_, clkpos_3_, clkpos_2_, clkpos_1_};
 
 // to test inverter instantiated within another module
-inv_fo4 inverterTest ( out[0], clkneg_1_, clkpos_1_, in, vdd,
+inv_fo4 inverterTest0 ( addr_bar[0], clkneg_1_, clkpos_1_, addr[0], vdd,
+     vss);
+inv_fo4 inverterTest1 ( addr_bar[1], clkneg_1_, clkpos_1_, addr[1], vdd,
+     vss);
+inv_fo4 inverterTest2 ( addr_bar[2], clkneg_1_, clkpos_1_, addr[2], vdd,
+     vss);
+inv_fo4 inverterTest3 ( addr_bar[3], clkneg_1_, clkpos_1_, addr[3], vdd,
+     vss);
+inv_fo4 inverterTest4 ( addr_bar[4], clkneg_1_, clkpos_1_, addr[4], vdd,
      vss);
 
-inv_fo4 inverterTest2 ( out[1], clkneg_1_, clkpos_1_, in, vdd,
+inv_fo4 inverterTest_in ( out, clkneg_1_, clkpos_1_, in, vdd,
      vss);     
 
 sram_decoderA_GLS2 decoderTestA ( PenOut0, PenOut0Bar, PenOut1, PenOut1Bar, word1, word2, ReadEn, WriteEn, RegWrtBar,
      clkneg_2_, clkneg_3_, clkneg_4_,
      clkpos_2_, clkpos_3_, clkpos_4_,
-     addr[0], ~addr[0], addr[1], addr[2], addr[3], addr[4], vdd, vss);
+     addr[0], addr_bar[0], addr[1], addr[2], addr[3], addr[4], vdd, vss);
+
+
 endmodule

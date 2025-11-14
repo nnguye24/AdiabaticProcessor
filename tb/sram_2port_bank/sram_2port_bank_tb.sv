@@ -20,8 +20,8 @@ wire instFlag;
 wire [4:0] clkpos_out;
 wire [4:0] clkneg_out;
 
-bennett_clock #(
-    .PHASES(WIDTH)   // PHASES(new), WIDTH(square)
+bennett_clock_square #(
+    .WIDTH(WIDTH)   // PHASES(new), WIDTH(square)
 ) bennett (
     .clk(clk),
     .reset(reset),
@@ -91,7 +91,9 @@ sram_2port_bank dut (
 
 assign srclkneg = (Mclk ^ clkpos[6]) & clkpos[6];
 assign srclkpos = ~srclkneg;
-assign RegWrtBar = clkneg[6];
+
+
+assign RegWrtBar = clkneg[6];   // change this. 0 goes to 1, only when writing.
 
 // Clock generation
 initial begin
@@ -113,8 +115,8 @@ initial begin
     ReadEn = 0;
     // Write operation
     @(posedge clkpos[2]);
-    Addr_A = 5'b00001;       
-    Addr_B = 5'b00010;
+    Addr_A = 5'b11111;       
+    Addr_B = 5'b11111;
     @(posedge clkpos[4]);
     in = 16'b1010101010101010;
     @(posedge clkpos[8]);
@@ -124,8 +126,8 @@ initial begin
 
     // Read operation
     @(posedge clkpos[2]);
-    Addr_A = 5'b00001;       
-    Addr_B = 5'b00000;
+    Addr_A = 5'b11111;       
+    Addr_B = 5'b11111;
     @(posedge clkpos[6]);
     ReadEn = 1;
     @(posedge clkpos[8]);
