@@ -800,14 +800,43 @@ endmodule
 
 // writing test module for bennett clocks going in
 
-module clocktest(
+module deviceTester(
+     // inverter
+     input in,
+     output [1:0] out,
+     // decoder
+     input [4:0] addr,
+     output word1,
+     output word2,
+     output PenOut0,
+     output PenOut0Bar,
+     output PenOut1,
+     output PenOut1Bar,
+     input ReadEn,
+     input WriteEn,
+     input RegWrtBar,
+
+     // clocks
      input clkneg_1_, clkneg_2_, clkneg_3_, clkneg_4_, clkneg_5_,
      input clkpos_1_, clkpos_2_, clkpos_3_, clkpos_4_, clkpos_5_,
      output [4:0] clkpos_out, 
-     output [4:0] clkneg_out
+     output [4:0] clkneg_out,
+     input vdd,
+     input vss
 );
 
 assign clkneg_out = {clkneg_5_, clkneg_4_, clkneg_3_, clkneg_2_, clkneg_1_};
 assign clkpos_out = {clkpos_5_, clkpos_4_, clkpos_3_, clkpos_2_, clkpos_1_};
 
+// to test inverter instantiated within another module
+inv_fo4 inverterTest ( out[0], clkneg_1_, clkpos_1_, in, vdd,
+     vss);
+
+inv_fo4 inverterTest2 ( out[1], clkneg_1_, clkpos_1_, in, vdd,
+     vss);     
+
+sram_decoderA_GLS2 decoderTestA ( PenOut0, PenOut0Bar, PenOut1, PenOut1Bar, word1, word2, ReadEn, WriteEn, RegWrtBar,
+     clkneg_2_, clkneg_3_, clkneg_4_,
+     clkpos_2_, clkpos_3_, clkpos_4_,
+     addr[0], ~addr[0], addr[1], addr[2], addr[3], addr[4], vdd, vss);
 endmodule

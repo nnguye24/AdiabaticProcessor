@@ -44,7 +44,23 @@ wire RegWrtBar; // comes phase 7
 reg [15:0] in;
 wire srclkneg, srclkpos;
 
-clocktest clktester(
+// to test submodule functionality
+wire [1:0] inv_out;
+wire word1, word2;
+wire PenOut0, PenOut0Bar, PenOut1, PenOut1Bar;
+deviceTester tester(
+    .in(in[1]),
+    .out(inv_out), 
+    .addr(Addr_A),
+    .word1(word1),
+    .word2(word2),
+    .PenOut0(PenOut0),
+    .PenOut0Bar(PenOut0Bar),
+    .PenOut1(PenOut1),
+    .PenOut1Bar(PenOut1Bar),
+    .ReadEn(ReadEn),
+    .WriteEn(WriteEn),
+    .RegWrtBar(RegWrtBar),
     .clkneg_1_(clkneg[4]),
     .clkneg_2_(clkneg[5]),  
     .clkneg_3_(clkneg[6]),
@@ -56,7 +72,9 @@ clocktest clktester(
     .clkpos_4_(clkpos[7]),
     .clkpos_5_(clkpos[9]),
     .clkpos_out(clkpos_out),
-    .clkneg_out(clkneg_out)
+    .clkneg_out(clkneg_out),
+    .vdd(vdd),
+    .vss(vss)
 );
 
 sram_2port_bank dut (
