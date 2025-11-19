@@ -40,7 +40,7 @@ wire [15:0] outA, outB;
 reg [4:0] Addr_A, Addr_B;
 reg ReadEn, WriteEn;    // WriteEn comes phase 9, ReadEn comes phase 7
 // maybe could d an assign for both enables
-wire RegWrtBar; // comes phase 7
+reg RegWrtBar; // comes phase 7
 reg [15:0] in;
 wire srclkneg, srclkpos;
 
@@ -93,7 +93,7 @@ assign srclkneg = (Mclk ^ clkpos[6]) & clkpos[6];
 assign srclkpos = ~srclkneg;
 
 
-assign RegWrtBar = clkneg[6];   // change this. 0 goes to 1, only when writing.
+// assign RegWrtBar = clkneg[6];   // change this. 0 goes to 1, only when writing.
 
 // Clock generation
 initial begin
@@ -111,6 +111,7 @@ initial begin
     reset = 0;
     ReadEn = 1;
     WriteEn = 0;
+    RegWrtBar = 0;
     #10
     ReadEn = 0;
     // Write operation
@@ -119,10 +120,14 @@ initial begin
     Addr_B = 5'b11111;
     @(posedge clkpos[4]);
     in = 16'b1010101010101010;
+    @(posedge clkpos[6]);
+    RegWrtBar = 1;
     @(posedge clkpos[8]);
     WriteEn = 1;
     @(posedge clkpos[9]);
     WriteEn = 0;
+    @(negedge clkpos[6]);
+    RegWrtBar = 0;
 
     // Read operation
     @(posedge clkpos[2]);

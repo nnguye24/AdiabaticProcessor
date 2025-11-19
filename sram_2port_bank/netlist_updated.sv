@@ -480,6 +480,7 @@ sram_2port_writedriver I2130 ( net3822, net1494, clkneg_2_, clkneg_3_,
 sram_2port_writedriver I2129 ( net3161, net2520, clkneg_2_, clkneg_3_,
      clkpos_2_, clkpos_3_, in_14_, vdd, vss, WriteEn);
 */
+
 sram_array array({outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
      outA_9_, outA_8_, outA_7_, outA_6_, outA_5_, outA_4_, outA_3_,
      outA_2_, outA_1_, outA_0_}, {outB_15_, outB_14_, outB_13_, outB_12_,
@@ -582,10 +583,6 @@ sram_2port_sensor I2075 ( outA_4_, net109, clkneg_5_, clkpos_5_, vdd,
 // sram1b_2port_reg0 I1935 ( net109, net108, vdd, vss, net720, net968);
 // sram1b_2port_reg0 I1967 ( net87, net86, vdd, vss, net720, net968);
 // sram1b_2port_reg0 I1999 ( net583, net582, vdd, vss, net720, net968);
-sram_decoderB_GLS2 I2203 ( net114, net67, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_BBar_2_, Addr_B_3_, Addr_B_4_, vdd,
-     vss);
 sram_decoderB_GLS2 I2204 ( net147, net68, ReadEn, clkneg_1_, clkneg_2_,
      clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
      Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_B_3_, Addr_B_4_,
@@ -806,12 +803,12 @@ module deviceTester(
      output out,
      // decoder
      input [4:0] addr,
-     output word1,
-     output word2,
-     output PenOut0,
-     output PenOut0Bar,
-     output PenOut1,
-     output PenOut1Bar,
+     output [4:0] word1,
+     output [4:0] word2,
+     output [5:0] PenOut0,
+     output [5:0] PenOut0Bar,
+     output [5:0] PenOut1,
+     output [5:0] PenOut1Bar,
      input ReadEn,
      input WriteEn,
      input RegWrtBar,
@@ -845,10 +842,14 @@ inv_fo4 inverterTest4 ( addr_bar[4], clkneg_1_, clkpos_1_, addr[4], vdd,
 inv_fo4 inverterTest_in ( out, clkneg_1_, clkpos_1_, in, vdd,
      vss);     
 
-sram_decoderA_GLS2 decoderTestA ( PenOut0, PenOut0Bar, PenOut1, PenOut1Bar, word1, word2, ReadEn, WriteEn, RegWrtBar,
+sram_decoderA_GLS2 decoderTestA ( PenOut0[0], PenOut0Bar[0], PenOut1[0], PenOut1Bar[0], word1[0], word2[0], ReadEn, RegWrtBar, WriteEn,
      clkneg_2_, clkneg_3_, clkneg_4_,
      clkpos_2_, clkpos_3_, clkpos_4_,
      addr[0], addr_bar[0], addr[1], addr[2], addr[3], addr[4], vdd, vss);
 
+sram_decoderA_GLS2 decoderTestA2 ( PenOut0[1], PenOut0Bar[1], PenOut1[1], PenOut1Bar[1], word1[1], word2[1], ReadEn, RegWrtBar, WriteEn,
+     clkneg_2_, clkneg_3_, clkneg_4_,
+     clkpos_2_, clkpos_3_, clkpos_4_,
+     addr[0], addr_bar[0], addr[1], addr[2], addr[3], addr_bar[4], vdd, vss);
 
 endmodule
