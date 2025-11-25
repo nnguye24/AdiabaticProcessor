@@ -74,6 +74,17 @@ initial begin
     @(posedge clkpos[9]);
     WriteEn = 0;
 
+    // Write operation
+    @(posedge clkpos[2]);
+    wordA = 32'b00000000000000000000000000000000;       
+    wordB = 32'b00000000000000000000000000000000;
+    @(posedge clkpos[4]);
+    in = 16'hABCD;
+    @(posedge clkpos[8]);
+    WriteEn = 1;
+    @(posedge clkpos[9]);
+    WriteEn = 0;
+
     // Read operation
     @(posedge clkpos[2]);
     wordA = 32'b00000000000000000000000000000001;       

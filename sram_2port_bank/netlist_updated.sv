@@ -445,6 +445,24 @@ specify
     specparam CDS_CELLNAME = "sram_2port_bank";
     specparam CDS_VIEWNAME = "schematic";
 endspecify
+
+// wires for address bar perhaps
+
+     wire Addr_ABar_0_, Addr_ABar_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_ABar_4_;
+     wire Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_BBar_3_, Addr_BBar_4_;
+
+     assign Addr_ABar_0_ = ~Addr_A_0_;
+     assign Addr_ABar_1_ = ~Addr_A_1_;
+     assign Addr_ABar_2_ = ~Addr_A_2_;
+     assign Addr_ABar_3_ = ~Addr_A_3_;
+     assign Addr_ABar_4_ = ~Addr_A_4_;
+
+     assign Addr_BBar_0_ = ~Addr_B_0_;
+     assign Addr_BBar_1_ = ~Addr_B_1_;
+     assign Addr_BBar_2_ = ~Addr_B_2_;
+     assign Addr_BBar_3_ = ~Addr_B_3_;
+     assign Addr_BBar_4_ = ~Addr_B_4_;
+
 /* Do not need write drivers in Verilog, as write drivers are for the analog stuff
 
 sram_2port_writedriver I2143 ( net83, net208, clkneg_2_, clkneg_3_,
@@ -643,6 +661,7 @@ sram_decoderB_GLS2 I2181 ( net30, net63, ReadEn, clkneg_1_, clkneg_2_,
      clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
      Addr_BBar_0_, Addr_B_1_, Addr_B_2_, Addr_B_3_, Addr_B_4_, vdd,
      vss);
+/*
 inv_fo4 I2221 ( Addr_ABar_1_, clkneg_1_, clkpos_1_, Addr_A_1_, vdd,
      vss);
 inv_fo4 I2222 ( Addr_ABar_2_, clkneg_1_, clkpos_1_, Addr_A_2_, vdd,
@@ -663,6 +682,7 @@ inv_fo4 I2217 ( Addr_BBar_1_, clkneg_1_, clkpos_1_, Addr_B_1_, vdd,
      vss);
 inv_fo4 I2176 ( Addr_ABar_0_, clkneg_1_, clkpos_1_, Addr_A_0_, vdd,
      vss);
+*/
 sram_decoderA_GLS2 I2175 ( net724, net723, net58, net49, net720, net59,
      ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
      clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
@@ -770,7 +790,7 @@ integer i;
 always @(*) begin
     convA = 5'b00000;
     convB = 5'b00000;
-    for (i = 0; i < 32; i = i + 1) begin
+    for (i = 1; i < 31; i = i + 1) begin
         if (wordA[i]) begin
             convA = i[4:0];
         end
@@ -782,12 +802,14 @@ end
 
 always @(*) begin
     // writing to SRAM 
+     
     if (ReadEn) begin
         outA = sram[convA];
         outB = sram[convB];
     end
 
     if(WriteEn) begin
+        sram[0] <= 16'h0000;
         sram[convA] <= in;
         sram[convB] <= in;
     end
@@ -828,6 +850,7 @@ assign clkneg_out = {clkneg_5_, clkneg_4_, clkneg_3_, clkneg_2_, clkneg_1_};
 assign clkpos_out = {clkpos_5_, clkpos_4_, clkpos_3_, clkpos_2_, clkpos_1_};
 
 // to test inverter instantiated within another module
+// generating address bars. 
 inv_fo4 inverterTest0 ( addr_bar[0], clkneg_1_, clkpos_1_, addr[0], vdd,
      vss);
 inv_fo4 inverterTest1 ( addr_bar[1], clkneg_1_, clkpos_1_, addr[1], vdd,

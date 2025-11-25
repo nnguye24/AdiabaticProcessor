@@ -115,10 +115,10 @@ initial begin
     #10
     ReadEn = 0;
     // Write operation
-    @(posedge clkpos[2]);
+    @(posedge clkpos[2]);   // address arrives in ph3, bars are generated in ph4
     Addr_A = 5'b11111;       
     Addr_B = 5'b11111;
-    @(posedge clkpos[4]);
+    @(posedge clkpos[4]);   // inputs in ph5
     in = 16'b1010101010101010;
     @(posedge clkpos[6]);
     RegWrtBar = 1;
@@ -131,19 +131,18 @@ initial begin
 
     // Read operation
     @(posedge clkpos[2]);
-    Addr_A = 5'b11111;       
+    Addr_A = 5'b00000;       
     Addr_B = 5'b11111;
+    @(posedge clkpos[4]);
+    in = 16'h0100;
     @(posedge clkpos[6]);
     ReadEn = 1;
     @(posedge clkpos[8]);
     ReadEn = 0;
 
-    @(posedge clkpos[2]);
-    Addr_A = 5'b00011;
-    @(posedge clkpos[6]);
-    ReadEn = 1;
-    @(posedge clkpos[8]);
-    ReadEn = 0;
+
+
+
     
     #400;
     $finish;
