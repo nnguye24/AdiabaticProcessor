@@ -116,34 +116,43 @@ initial begin
     ReadEn = 0;
     // Write operation
     @(posedge clkpos[2]);   // address arrives in ph3, bars are generated in ph4
+    $display("At posedge clkpos[2]: Starting write operation");
+    $display("Doing a write\n");
     Addr_A = 5'b11111;       
     Addr_B = 5'b11111;
+    $display("Addr_A: %b, Addr_B: %b\n", Addr_A, Addr_B);
     @(posedge clkpos[4]);   // inputs in ph5
+    $display("At posedge clkpos[4]: Setting input data");
     in = 16'b1010101010101010;
     @(posedge clkpos[6]);
+    $display("At posedge clkpos[6]: Setting RegWrtBar");
     RegWrtBar = 1;
     @(posedge clkpos[8]);
+    $display("At posedge clkpos[8]: Enabling WriteEn");
     WriteEn = 1;
+    $display("WriteEn: %b", WriteEn);
     @(posedge clkpos[9]);
+    $display("At posedge clkpos[9]: Disabling WriteEn");
     WriteEn = 0;
     @(negedge clkpos[6]);
+    $display("At negedge clkpos[6]: Resetting RegWrtBar");
     RegWrtBar = 0;
 
     // Read operation
     @(posedge clkpos[2]);
+    $display("At posedge clkpos[2]: Starting read operation");
     Addr_A = 5'b00000;       
     Addr_B = 5'b11111;
     @(posedge clkpos[4]);
+    $display("At posedge clkpos[4]: Setting input data for read");
     in = 16'h0100;
     @(posedge clkpos[6]);
+    $display("At posedge clkpos[6]: Enabling ReadEn");
     ReadEn = 1;
     @(posedge clkpos[8]);
+    $display("At posedge clkpos[8]: Disabling ReadEn");
     ReadEn = 0;
 
-
-
-
-    
     #400;
     $finish;
 end
