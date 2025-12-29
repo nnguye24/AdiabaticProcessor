@@ -45,37 +45,37 @@ reg [15:0] in;
 wire srclkneg, srclkpos;
 
 // to test submodule functionality
-wire [1:0] inv_out;
-wire word1, word2;
-wire PenOut0, PenOut0Bar, PenOut1, PenOut1Bar;
-deviceTester tester(
-    .in(in[1]),
-    .out(inv_out), 
-    .addr(Addr_A),
-    .word1(word1),
-    .word2(word2),
-    .PenOut0(PenOut0),
-    .PenOut0Bar(PenOut0Bar),
-    .PenOut1(PenOut1),
-    .PenOut1Bar(PenOut1Bar),
-    .ReadEn(ReadEn),
-    .WriteEn(WriteEn),
-    .RegWrtBar(RegWrtBar),
-    .clkneg_1_(clkneg[4]),
-    .clkneg_2_(clkneg[5]),  
-    .clkneg_3_(clkneg[6]),
-    .clkneg_4_(clkneg[7]),
-    .clkneg_5_(clkneg[9]),
-    .clkpos_1_(clkpos[4]),
-    .clkpos_2_(clkpos[5]),
-    .clkpos_3_(clkpos[6]),
-    .clkpos_4_(clkpos[7]),
-    .clkpos_5_(clkpos[9]),
-    .clkpos_out(clkpos_out),
-    .clkneg_out(clkneg_out),
-    .vdd(vdd),
-    .vss(vss)
-);
+// wire [1:0] inv_out;
+// wire word1, word2;
+// wire PenOut0, PenOut0Bar, PenOut1, PenOut1Bar;
+// deviceTester tester(
+//     .in(in[1]),
+//     .out(inv_out), 
+//     .addr(Addr_A),
+//     .word1(word1),
+//     .word2(word2),
+//     .PenOut0(PenOut0),
+//     .PenOut0Bar(PenOut0Bar),
+//     .PenOut1(PenOut1),
+//     .PenOut1Bar(PenOut1Bar),
+//     .ReadEn(ReadEn),
+//     .WriteEn(WriteEn),
+//     .RegWrtBar(RegWrtBar),
+//     .clkneg_1_(clkneg[4]),
+//     .clkneg_2_(clkneg[5]),  
+//     .clkneg_3_(clkneg[6]),
+//     .clkneg_4_(clkneg[7]),
+//     .clkneg_5_(clkneg[9]),
+//     .clkpos_1_(clkpos[4]),
+//     .clkpos_2_(clkpos[5]),
+//     .clkpos_3_(clkpos[6]),
+//     .clkpos_4_(clkpos[7]),
+//     .clkpos_5_(clkpos[9]),
+//     .clkpos_out(clkpos_out),
+//     .clkneg_out(clkneg_out),
+//     .vdd(vdd),
+//     .vss(vss)
+// );
 
 sram_2port_bank dut (
     outA[15], outA[14], outA[13], outA[12], outA[11], outA[10], outA[9], outA[8], outA[7], outA[6], outA[5], outA[4], outA[3], outA[2], outA[1], outA[0],
@@ -93,8 +93,6 @@ assign srclkneg = (Mclk ^ clkpos[6]) & clkpos[6];
 assign srclkpos = ~srclkneg;
 
 
-// assign RegWrtBar = clkneg[6];   // change this. 0 goes to 1, only when writing.
-
 // Clock generation
 initial begin
     clk = 0;
@@ -105,6 +103,9 @@ initial begin
     $dumpvars(0, sram_bank_tb);
 end
 
+
+ reg [5:0] i;
+
 initial begin
     reset = 1;
     #10;
@@ -114,46 +115,74 @@ initial begin
     RegWrtBar = 0;
     #10
     ReadEn = 0;
+
+    // PRE TEST PEEK
+    $display("Pre Test peek into SRAM cells");
+    for ( i = 0; i < 32; i = i + 1) begin
+        $display("SRAM at address: %d --- Data: %b", i, dut.array.sram[i]);
+    end
+    $display("------ End of peek ------\n");
+
+
     // Write operation
     @(posedge clkpos[2]);   // address arrives in ph3, bars are generated in ph4
     $display("At posedge clkpos[2]: Starting write operation");
-    $display("Doing a write\n");
-    Addr_A = 5'b11111;       
+    Addr_A = 5'b00010;       
     Addr_B = 5'b11111;
+    // $display("Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA,dut.array.wordB);
     $display("Addr_A: %b, Addr_B: %b\n", Addr_A, Addr_B);
+
     @(posedge clkpos[4]);   // inputs in ph5
     $display("At posedge clkpos[4]: Setting input data");
     in = 16'b1010101010101010;
+    $display("Input: %b", in);
+
     @(posedge clkpos[6]);
     $display("At posedge clkpos[6]: Setting RegWrtBar");
     RegWrtBar = 1;
+    $display("After PH6, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+
     @(posedge clkpos[8]);
     $display("At posedge clkpos[8]: Enabling WriteEn");
     WriteEn = 1;
+    // found something, I put the addresses as non zero but the decoders will output word line as something else?
+    $display("After PH8, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
     $display("WriteEn: %b", WriteEn);
+
     @(posedge clkpos[9]);
     $display("At posedge clkpos[9]: Disabling WriteEn");
     WriteEn = 0;
+    $display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+
     @(negedge clkpos[6]);
     $display("At negedge clkpos[6]: Resetting RegWrtBar");
     RegWrtBar = 0;
+
 
     // Read operation
     @(posedge clkpos[2]);
     $display("At posedge clkpos[2]: Starting read operation");
     Addr_A = 5'b00000;       
-    Addr_B = 5'b11111;
+    Addr_B = 5'b00001;
+
     @(posedge clkpos[4]);
     $display("At posedge clkpos[4]: Setting input data for read");
     in = 16'h0100;
+
     @(posedge clkpos[6]);
     $display("At posedge clkpos[6]: Enabling ReadEn");
     ReadEn = 1;
+
     @(posedge clkpos[8]);
     $display("At posedge clkpos[8]: Disabling ReadEn");
     ReadEn = 0;
 
-    #400;
+    $display("Post Test peek into SRAM cells");
+    for ( i = 0; i < 32; i = i + 1) begin
+        $display("SRAM at address: %b --- Data: %b", i, dut.array.sram[i]);
+    end
+    $display("------ End of peek ------\n");
+
     $finish;
 end
 

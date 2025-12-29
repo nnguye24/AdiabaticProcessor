@@ -21,3 +21,10 @@ iverilog -g2012 -I ../../tranif -o sram_cell ../../sram_2port_bank/netlist.sv sr
 vvp sram_cell
 gtkwave sram.vcd
 ```
+### For sram_array (the behavioral model)
+```
+iverilog -g2012 -I ../../tranif -o sram_array ../../sram_2port_bank/sram_array.sv sram_array_tb.sv
+vvp sram_array
+gtkwave sram_array.vcd
+
+```
