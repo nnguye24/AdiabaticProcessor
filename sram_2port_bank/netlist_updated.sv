@@ -448,8 +448,8 @@ endspecify
 
 // wires for address bar perhaps
 
-     wire Addr_ABar_0_, Addr_ABar_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_ABar_4_;
-     wire Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_BBar_3_, Addr_BBar_4_;
+     logic Addr_ABar_0_, Addr_ABar_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_ABar_4_;
+     logic Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_BBar_3_, Addr_BBar_4_;
 
      assign Addr_ABar_0_ = ~Addr_A_0_;
      assign Addr_ABar_1_ = ~Addr_A_1_;
@@ -506,14 +506,14 @@ sram_array array({outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
      outB_4_, outB_3_, outB_2_, outB_1_, outB_0_},
     // concatenate all outputs from decoders, word determines address, 1 hot
      // wordA
-     {net720,net59,net691,net57,net662,net56,net633,net52,net604,net51,net572,net50,
-     net543,net48,net511,net44,net482,net40,net452,net36,net423,net34,net394,net27,
-     net364,net23,net334,net16,net304,net12,net275,net7},
+     {net7,net275,net12,net304,net16,net334,net23,net364,net27,net394,net34,net423,
+     net36,net452,net40,net482,net44,net511,net48,net543,net50,net572,net51,net604,
+     net52,net633,net56,net662,net57,net691,net59,net720},
      // wordB
-     {net968,net101,net946,net100,net924,net95,net902,net91,net880,net90,net858,
-     net89,net836,net85,net814,net84,net792,net82,net770,net79,net748,
-     net75,net591,net71,net147,net68,net114, net67,net77,net66,net30,net63}, 
-
+     {net63,net30,net66,net77,net67,net114,net68,net147,net71,net591,net75,net748,
+     net79,net770,net82,net792,net84,net814,net85,net836,net89,net858,net90,net880,
+     net91,net902,net95,net924,net100,net946,net101,net968}, 
+     // read, write, and input.... and also srclk
      ReadEn, WriteEn, {in_15_, in_14_, in_13_, in_12_, in_11_, in_10_, in_9_, in_8_,
      in_7_, in_6_, in_5_, in_4_, in_3_, in_2_, in_1_, in_0_}, srclkneg,
      srclkpos
@@ -601,6 +601,11 @@ sram_2port_sensor I2075 ( outA_4_, net109, clkneg_5_, clkpos_5_, vdd,
 // sram1b_2port_reg0 I1935 ( net109, net108, vdd, vss, net720, net968);
 // sram1b_2port_reg0 I1967 ( net87, net86, vdd, vss, net720, net968);
 // sram1b_2port_reg0 I1999 ( net583, net582, vdd, vss, net720, net968);
+sram_decoderB_GLS2 I2203 ( net114, net67, ReadEn, clkneg_1_, clkneg_2_,
+     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
+     Addr_BBar_0_, Addr_B_1_, Addr_BBar_2_, Addr_B_3_, Addr_B_4_, vdd,
+     vss);
+
 sram_decoderB_GLS2 I2204 ( net147, net68, ReadEn, clkneg_1_, clkneg_2_,
      clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
      Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_B_3_, Addr_B_4_,
