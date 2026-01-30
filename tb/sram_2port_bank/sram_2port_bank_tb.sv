@@ -1,6 +1,7 @@
 `include "../../bennettclock/bennettClock.sv"
 // maybe use the old bennett clock?
 `include "../../bennettclock/bennettClock_square.sv"
+`include "../../bennettclock/bennettClock_noX.sv"
 
 module sram_bank_tb();
 supply1 vdd;
@@ -30,6 +31,19 @@ bennett_clock_square #(
     .instFlag(instFlag)
 );
 
+/*
+bennett_clock_noX #(    // no X values Bennett Clock
+        .WIDTH(WIDTH)
+    ) bennett (
+        .clk(clk),
+        .reset(reset),
+      	.instFlag(instFlag),
+      	.Mclk(Mclk),
+        .clkn(clkneg),
+        .clkp(clkpos)
+    );
+*/
+// for the square generator
 assign clkneg = ~clkpos;
 
 // SRAM bank related signals
@@ -127,8 +141,10 @@ initial begin
     // Write operation
     @(posedge clkpos[2]);   // address arrives in ph3, bars are generated in ph4
     $display("At posedge clkpos[2]: Starting write operation");
-    Addr_A = 5'b00010;       
+    Addr_A = 5'b00001;       
     Addr_B = 5'b11111;
+    $display("After PH2, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+
     // $display("Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA,dut.array.wordB);
     $display("Addr_A: %b, Addr_B: %b\n", Addr_A, Addr_B);
 
@@ -136,12 +152,13 @@ initial begin
     $display("At posedge clkpos[4]: Setting input data");
     in = 16'b1010101010101010;
     $display("Input: %b", in);
+    $display("After PH4, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
 
     @(posedge clkpos[6]);
     $display("At posedge clkpos[6]: Setting RegWrtBar");
     RegWrtBar = 1;
     $display("After PH6, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
-
+    
     @(posedge clkpos[8]);
     $display("At posedge clkpos[8]: Enabling WriteEn");
     WriteEn = 1;
@@ -161,25 +178,37 @@ initial begin
 
     // Read operation
     @(posedge clkpos[2]);
+    
     $display("At posedge clkpos[2]: Starting read operation");
-    Addr_A = 5'b00000;       
-    Addr_B = 5'b00001;
+    
+    Addr_A = 5'b00001; 
+    Addr_B = 5'b00000;
+    $display("Addr_A: %b, Addr_B: %b\n", Addr_A, Addr_B);
 
     @(posedge clkpos[4]);
+    $display("=====READ OPERATION=====");
     $display("At posedge clkpos[4]: Setting input data for read");
     in = 16'h0100;
 
     @(posedge clkpos[6]);
     $display("At posedge clkpos[6]: Enabling ReadEn");
     ReadEn = 1;
-
+    $display("After PH8, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    
+    
     @(posedge clkpos[8]);
     $display("At posedge clkpos[8]: Disabling ReadEn");
     ReadEn = 0;
 
+    @(posedge clkpos[9]);
+
+    @(negedge clkpos[0]);
+    $display("OUTPUT CHECK");
+    $display("outA: %b \noutB: %b\n", outA, outB);
+
     $display("Post Test peek into SRAM cells");
     for ( i = 0; i < 32; i = i + 1) begin
-        $display("SRAM at address: %b --- Data: %b", i, dut.array.sram[i]);
+        $display("SRAM at address: %d --- Data: %b", i, dut.array.sram[i]);
     end
     $display("------ End of peek ------\n");
 

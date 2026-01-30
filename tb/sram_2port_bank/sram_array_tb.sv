@@ -83,7 +83,7 @@ initial begin
     // Write operation
     @(posedge clkpos[2]);
     wordA = 32'b00000000000000000000000000000010;   // actaully the 1 address, because 1 hot!!!, 000.00001 is 0 address
-    wordB = 32'b00000000000000000000000000000010;
+    wordB = 32'b00000000000000000000000000000100;
     @(posedge clkpos[4]);
     in = 16'b1010101010101010;
     @(posedge clkpos[8]);
@@ -95,8 +95,8 @@ initial begin
 
     // Write operation
     @(posedge clkpos[2]);
-    wordA = 32'b00000000000000000000000000000100;       
-    wordB = 32'b00000000000000000000000000000100;
+    wordA = 32'b00000000000000000000000000100000;       
+    wordB = 32'b00000000000000000000000000001000;
     @(posedge clkpos[4]);
     in = 16'hABCD;
     @(posedge clkpos[8]);

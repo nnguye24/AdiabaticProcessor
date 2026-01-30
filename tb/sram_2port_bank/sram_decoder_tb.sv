@@ -1,4 +1,5 @@
-`include "../../bennettclock/bennettClock.sv"
+
+`include "../../bennettclock/bennettClock_square.sv"
 
 
 module sram_decoder_tb();
@@ -8,12 +9,12 @@ supply1 vdd;
 supply0 vss;
 
 // Clock Related Signal
-reg clk;
-reg reset;
-wire [9:0] clkpos;
-wire [9:0] clkneg;
-reg Mclk;
-wire instFlag;
+logic clk;
+logic reset;
+logic [9:0] clkpos;
+logic [9:0] clkneg;
+logic Mclk;
+logic instFlag;
 
 bennett_clock_square #(.WIDTH(10)) bennett (
     .clk(clk),
@@ -26,13 +27,13 @@ bennett_clock_square #(.WIDTH(10)) bennett (
 assign clkneg = ~clkpos;
 
 // Inputs
-reg ReadEn, WriteEn;
-reg [4:0] inA;
-wire inABar;
-wire RegWrtBar;
+logic ReadEn, WriteEn;
+logic [4:0] inA;
+logic inABar;
+logic RegWrtBar;
 // Outputs
-wire PenOut0, PenOut0Bar, PenOut1, PenOut1Bar;
-wire WordA0, WordA1;
+logic PenOut0, PenOut0Bar, PenOut1, PenOut1Bar;
+logic WordA0, WordA1;
 
 sram_decoderA_GLS2 dut (
     .PenOut0(PenOut0),
@@ -48,7 +49,6 @@ sram_decoderA_GLS2 dut (
     .clkneg2(clkneg[5]),
     .clkneg3(clkneg[6]),
     .clkpos(clkpos[4]),
-
     .clkpos2(clkpos[5]),
     .clkpos3(clkpos[6]),
     .in0A(inA[0]),
@@ -61,7 +61,7 @@ sram_decoderA_GLS2 dut (
     .vss(vss)
 );
 assign in0ABar = ~inA[0];
-assign RegWrtBar = clkneg[6];
+assign RegWrtBar = clkpos[6];
 
 // Clock generation
 initial begin
@@ -104,7 +104,7 @@ initial begin
 
     // Read
     @(posedge clkpos[2]);
-    inA = 5'b00011; // Address 1
+    inA = 5'b11111; // Address 1
     @(posedge clkpos[6]);
     ReadEn = 1;
     @(posedge clkpos[8]);
