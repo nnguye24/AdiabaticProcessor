@@ -83,7 +83,7 @@ initial begin
     // Write operation
     @(posedge clkpos[2]);
     wordA = 32'b00000000000000000000000000000010;   // actaully the 1 address, because 1 hot!!!, 000.00001 is 0 address
-    wordB = 32'b00000000000000000000000000000100;
+    wordB = 32'b10000000000000000000000000000000;
     @(posedge clkpos[4]);
     in = 16'b1010101010101010;
     @(posedge clkpos[8]);
@@ -96,7 +96,7 @@ initial begin
     // Write operation
     @(posedge clkpos[2]);
     wordA = 32'b00000000000000000000000000100000;       
-    wordB = 32'b00000000000000000000000000001000;
+    wordB = 32'b10000000000000000000000000000000;
     @(posedge clkpos[4]);
     in = 16'hABCD;
     @(posedge clkpos[8]);
@@ -109,7 +109,7 @@ initial begin
     // Read operation
     @(posedge clkpos[2]);
     wordA = 32'b00000000000000000000000000000001;       
-    wordB = 32'b00000000000000000000000000000010;
+    wordB = 32'b10000000000000000000000000000000;
     @(posedge clkpos[6]);
     ReadEn = 1;
     $display("Reading from address A: %h --- Data: %b\n", wordA, dut.sram[0]);

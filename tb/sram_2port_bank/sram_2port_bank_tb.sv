@@ -141,34 +141,34 @@ initial begin
     // Write operation
     @(posedge clkpos[2]);   // address arrives in ph3, bars are generated in ph4
     $display("At posedge clkpos[2]: Starting write operation");
-    Addr_A = 5'b00001;       
-    Addr_B = 5'b11111;
-    $display("After PH2, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    Addr_A = 5'b00100;       
+    Addr_B = 5'b00100;
+    
 
     // $display("Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA,dut.array.wordB);
-    $display("Addr_A: %b, Addr_B: %b\n", Addr_A, Addr_B);
+    $display("Addr_A: %d, Addr_B: %d\n", Addr_A, Addr_B);
 
     @(posedge clkpos[4]);   // inputs in ph5
     $display("At posedge clkpos[4]: Setting input data");
     in = 16'b1010101010101010;
     $display("Input: %b", in);
-    $display("After PH4, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    
 
     @(posedge clkpos[6]);
     $display("At posedge clkpos[6]: Setting RegWrtBar");
     RegWrtBar = 1;
-    $display("After PH6, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    
     
     @(posedge clkpos[8]);
     $display("At posedge clkpos[8]: Enabling WriteEn");
     WriteEn = 1;
-    // found something, I put the addresses as non zero but the decoders will output word line as something else?
-    $display("After PH8, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
     $display("WriteEn: %b", WriteEn);
 
     @(posedge clkpos[9]);
     $display("At posedge clkpos[9]: Disabling WriteEn");
     WriteEn = 0;
+
+    @(negedge clkpos[9]);
     $display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
 
     @(negedge clkpos[6]);
@@ -182,7 +182,7 @@ initial begin
     $display("At posedge clkpos[2]: Starting read operation");
     
     Addr_A = 5'b00001; 
-    Addr_B = 5'b00000;
+    Addr_B = 5'b00100;
     $display("Addr_A: %b, Addr_B: %b\n", Addr_A, Addr_B);
 
     @(posedge clkpos[4]);
@@ -193,16 +193,16 @@ initial begin
     @(posedge clkpos[6]);
     $display("At posedge clkpos[6]: Enabling ReadEn");
     ReadEn = 1;
-    $display("After PH8, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
-    
-    
+
     @(posedge clkpos[8]);
     $display("At posedge clkpos[8]: Disabling ReadEn");
     ReadEn = 0;
 
     @(posedge clkpos[9]);
-
+    $display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    // extra pause
     @(negedge clkpos[0]);
+
     $display("OUTPUT CHECK");
     $display("outA: %b \noutB: %b\n", outA, outB);
 
