@@ -92,16 +92,17 @@ wire srclkneg, srclkpos;
 // );
 
 sram_2port_bank dut (
-    outA[15], outA[14], outA[13], outA[12], outA[11], outA[10], outA[9], outA[8], outA[7], outA[6], outA[5], outA[4], outA[3], outA[2], outA[1], outA[0],
-    outB[15], outB[14], outB[13], outB[12], outB[11], outB[10], outB[9], outB[8], outB[7], outB[6], outB[5], outB[4], outB[3], outB[2], outB[1], outB[0],
-    Addr_A[4], Addr_A[3], Addr_A[2], Addr_A[1], Addr_A[0],  //a3
-    Addr_B[4], Addr_B[3], Addr_B[2], Addr_B[1], Addr_B[0],  // instruction
+    {outA[15], outA[14], outA[13], outA[12], outA[11], outA[10], outA[9], outA[8], outA[7], outA[6], outA[5], outA[4], outA[3], outA[2], outA[1], outA[0]},
+    {outB[15], outB[14], outB[13], outB[12], outB[11], outB[10], outB[9], outB[8], outB[7], outB[6], outB[5], outB[4], outB[3], outB[2], outB[1], outB[0]},
+    {Addr_A[4], Addr_A[3], Addr_A[2], Addr_A[1], Addr_A[0]},  //a3
+    {Addr_B[4], Addr_B[3], Addr_B[2], Addr_B[1], Addr_B[0]},  // instruction
     ReadEn, RegWrtBar, WriteEn, // control signals
-    clkneg[4], clkneg[5], clkneg[6], clkneg[7], clkneg[9], //5-8, then 10
-    clkpos[4], clkpos[5], clkpos[6], clkpos[7], clkpos[9], // inside the definition they go 1-5
-    in[15], in[14], in[13], in[12], in[11], in[10], in[9], in[8], in[7], in[6], in[5], in[4], in[3], in[2], in[1], in[0],
+    {clkneg[4], clkneg[5], clkneg[6], clkneg[7], clkneg[9]}, //5-8, then 10
+    {clkpos[4], clkpos[5], clkpos[6], clkpos[7], clkpos[9]}, // inside the definition they go 1-5
+    {in[15], in[14], in[13], in[12], in[11], in[10], in[9], in[8], in[7], in[6], in[5], in[4], in[3], in[2], in[1], in[0]},
     srclkneg, srclkpos, vdd, vss
 );
+
 
 
 
@@ -132,18 +133,12 @@ initial begin
     #10
     ReadEn = 0;
 
-    // PRE TEST PEEK
-    $display("Pre Test peek into SRAM cells");
-    for ( i = 0; i < 32; i = i + 1) begin
-        $display("SRAM at address: %d --- Data: %b", i, dut.array.sram[i]);
-    end
-    $display("------ End of peek ------\n");
 
 
     // Write operation
     @(posedge clkpos[2]);   // address arrives in ph3, bars are generated in ph4
     $display("At posedge clkpos[2]: Starting write operation");
-    Addr_A = 5'b00100;       
+    Addr_A = 5'b00001;       
     Addr_B = 5'b00100;
     
 
@@ -171,7 +166,7 @@ initial begin
     WriteEn = 0;
 
     @(negedge clkpos[9]);
-    $display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    //$display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
 
     @(negedge clkpos[6]);
     $display("At negedge clkpos[6]: Resetting RegWrtBar");
@@ -201,18 +196,13 @@ initial begin
     ReadEn = 0;
 
     @(posedge clkpos[9]);
-    $display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
+    //$display("After PH9, Word Line inputs to the array: \n wordA: %b\n wordB: %b\n",dut.array.wordA, dut.array.wordB);
     // extra pause
     @(negedge clkpos[0]);
 
     $display("OUTPUT CHECK");
     $display("outA: %b \noutB: %b\n", outA, outB);
 
-    $display("Post Test peek into SRAM cells");
-    for ( i = 0; i < 32; i = i + 1) begin
-        $display("SRAM at address: %d --- Data: %b", i, dut.array.sram[i]);
-    end
-    $display("------ End of peek ------\n");
 
     $finish;
 end

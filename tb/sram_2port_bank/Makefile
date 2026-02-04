@@ -1,6 +1,7 @@
 IVERILOG = iverilog
 FLAGS    = -g2012 -I ../../tranif
 NETLIST  = ../../sram_2port_bank/netlist_updated.sv
+NETLIST_OG = ../../sram_2port_bank/netlist.sv
 
 CU:
 	$(IVERILOG) $(FLAGS) -o CU ../../control_unit/control_unit.sv CU_tb.sv
@@ -9,6 +10,10 @@ CU:
 
 sram_bank:
 	$(IVERILOG) $(FLAGS) -o sram_bank $(NETLIST) sram_2port_bank_tb.sv
+	vvp sram_bank
+	gtkwave sram_bank.vcd
+sram_bank_og:
+	$(IVERILOG) $(FLAGS) -o sram_bank $(NETLIST_OG) sram_2port_bank_og_tb.sv
 	vvp sram_bank
 	gtkwave sram_bank.vcd
 
