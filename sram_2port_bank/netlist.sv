@@ -1,7 +1,6 @@
 
 // timscale directive file
-`include "/afs/crc.nd.edu/user/g/gsnider/MIPS25/V1.10.513/VirtuosoOA/examples/sram_2port_bank_run1/hdlFilesDir/timescaleF"
-
+`include "custom_tranif.sv"
 
 // Verilog HDL and netlist files of
 // "MIPS25 sram_2port_bank schematic"
@@ -408,35 +407,29 @@ sram_nor2bPhi2 I8 ( net044, net029, net3, clkneg2, clkpos2, vdd, vss);
 endmodule
 // Library - MIPS25, Cell - sram_2port_bank, View - schematic
 // LAST TIME SAVED: Aug 28 09:37:36 2025
-// NETLIST TIME: Nov 19 15:33:18 2025
+// NETLIST TIME: Oct 30 11:32:00 2025
 `timescale 1ns / 1ns 
 
-module sram_2port_bank ( outA_15_, outA_14_, outA_13_, outA_12_,
-     outA_11_, outA_10_, outA_9_, outA_8_, outA_7_, outA_6_, outA_5_,
-     outA_4_, outA_3_, outA_2_, outA_1_, outA_0_, outB_15_, outB_14_,
-     outB_13_, outB_12_, outB_11_, outB_10_, outB_9_, outB_8_, outB_7_,
-     outB_6_, outB_5_, outB_4_, outB_3_, outB_2_, outB_1_, outB_0_,
-     Addr_A_4_, Addr_A_3_, Addr_A_2_, Addr_A_1_, Addr_A_0_, Addr_B_4_,
-     Addr_B_3_, Addr_B_2_, Addr_B_1_, Addr_B_0_, ReadEn, RegWrtBar,
-     WriteEn, clkneg_1_, clkneg_2_, clkneg_3_, clkneg_4_, clkneg_5_,
-     clkpos_1_, clkpos_2_, clkpos_3_, clkpos_4_, clkpos_5_, in_15_,
-     in_14_, in_13_, in_12_, in_11_, in_10_, in_9_, in_8_, in_7_,
-     in_6_, in_5_, in_4_, in_3_, in_2_, in_1_, in_0_, srclkneg,
-     srclkpos, vdd, vss );
+module sram_2port_bank ( outA, outB, Addr_A, Addr_B, ReadEn, RegWrtBar,
+     WriteEn, clkneg, clkpos, in, srclkneg, srclkpos, vdd, vss );
 
-output  outA_15_, outA_14_, outA_13_, outA_12_, outA_11_, outA_10_,
-     outA_9_, outA_8_, outA_7_, outA_6_, outA_5_, outA_4_, outA_3_,
-     outA_2_, outA_1_, outA_0_, outB_15_, outB_14_, outB_13_, outB_12_,
-     outB_11_, outB_10_, outB_9_, outB_8_, outB_7_, outB_6_, outB_5_,
-     outB_4_, outB_3_, outB_2_, outB_1_, outB_0_;
 
-input  Addr_A_4_, Addr_A_3_, Addr_A_2_, Addr_A_1_, Addr_A_0_,
-     Addr_B_4_, Addr_B_3_, Addr_B_2_, Addr_B_1_, Addr_B_0_, ReadEn,
-     RegWrtBar, WriteEn, clkneg_1_, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkneg_5_, clkpos_1_, clkpos_2_, clkpos_3_, clkpos_4_, clkpos_5_,
-     in_15_, in_14_, in_13_, in_12_, in_11_, in_10_, in_9_, in_8_,
-     in_7_, in_6_, in_5_, in_4_, in_3_, in_2_, in_1_, in_0_, srclkneg,
-     srclkpos, vdd, vss;
+input  ReadEn, RegWrtBar, WriteEn, srclkneg, srclkpos, vdd, vss;
+
+output [15:0]  outA;
+output [15:0]  outB;
+
+input [4:0]  Addr_B;
+input [4:0]  Addr_A;
+input [1:5]  clkneg;
+input [15:0]  in;
+input [1:5]  clkpos;
+
+// Buses in the design
+
+wire  [0:4]  Addr_BBar;
+
+wire  [0:4]  Addr_ABar;
 
 
 specify 
@@ -445,38 +438,38 @@ specify
     specparam CDS_VIEWNAME = "schematic";
 endspecify
 
-sram_2port_writedriver I2143 ( net83, net208, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_0_, vdd, vss, WriteEn);
-sram_2port_writedriver I2128 ( net5906, net2000, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_15_, vdd, vss, WriteEn);
-sram_2port_writedriver I2142 ( net540, net539, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_1_, vdd, vss, WriteEn);
-sram_2port_writedriver I2141 ( net584, net583, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_2_, vdd, vss, WriteEn);
-sram_2port_writedriver I2140 ( net88, net87, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_3_, vdd, vss, WriteEn);
-sram_2port_writedriver I2139 ( net110, net109, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_4_, vdd, vss, WriteEn);
-sram_2port_writedriver I2138 ( net22, net21, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_5_, vdd, vss, WriteEn);
-sram_2port_writedriver I2137 ( net11, net10, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_6_, vdd, vss, WriteEn);
-sram_2port_writedriver I2136 ( net33, net32, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_7_, vdd, vss, WriteEn);
-sram_2port_writedriver I2135 ( net121, net120, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_8_, vdd, vss, WriteEn);
-sram_2port_writedriver I2134 ( net55, net54, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_9_, vdd, vss, WriteEn);
-sram_2port_writedriver I2133 ( net3866, net1488, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_10_, vdd, vss, WriteEn);
-sram_2port_writedriver I2132 ( net3811, net2485, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_11_, vdd, vss, WriteEn);
-sram_2port_writedriver I2131 ( net3789, net2302, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_12_, vdd, vss, WriteEn);
-sram_2port_writedriver I2130 ( net3822, net1494, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_13_, vdd, vss, WriteEn);
-sram_2port_writedriver I2129 ( net3161, net2520, clkneg_2_, clkneg_3_,
-     clkpos_2_, clkpos_3_, in_14_, vdd, vss, WriteEn);
+sram_2port_writedriver I2143 ( net83, net208, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[0], vdd, vss, WriteEn);
+sram_2port_writedriver I2128 ( net5906, net2000, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[15], vdd, vss, WriteEn);
+sram_2port_writedriver I2142 ( net540, net539, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[1], vdd, vss, WriteEn);
+sram_2port_writedriver I2141 ( net584, net583, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[2], vdd, vss, WriteEn);
+sram_2port_writedriver I2140 ( net88, net87, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[3], vdd, vss, WriteEn);
+sram_2port_writedriver I2139 ( net110, net109, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[4], vdd, vss, WriteEn);
+sram_2port_writedriver I2138 ( net22, net21, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[5], vdd, vss, WriteEn);
+sram_2port_writedriver I2137 ( net11, net10, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[6], vdd, vss, WriteEn);
+sram_2port_writedriver I2136 ( net33, net32, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[7], vdd, vss, WriteEn);
+sram_2port_writedriver I2135 ( net121, net120, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[8], vdd, vss, WriteEn);
+sram_2port_writedriver I2134 ( net55, net54, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[9], vdd, vss, WriteEn);
+sram_2port_writedriver I2133 ( net3866, net1488, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[10], vdd, vss, WriteEn);
+sram_2port_writedriver I2132 ( net3811, net2485, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[11], vdd, vss, WriteEn);
+sram_2port_writedriver I2131 ( net3789, net2302, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[12], vdd, vss, WriteEn);
+sram_2port_writedriver I2130 ( net3822, net1494, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[13], vdd, vss, WriteEn);
+sram_2port_writedriver I2129 ( net3161, net2520, clkneg[2], clkneg[3],
+     clkpos[2], clkpos[3], in[14], vdd, vss, WriteEn);
 sram1b_2port I1600 ( net3161, net2520, net98, net42, net41, srclkneg,
      srclkpos, vdd, vss, net44, net84);
 sram1b_2port I1599 ( net3161, net2520, net98, net484, net483, srclkneg,
@@ -1469,69 +1462,69 @@ sram1b_2port I2059 ( net83, net208, net207, net664, net663, srclkneg,
      srclkpos, vdd, vss, net662, net924);
 sram1b_2port I2046 ( net83, net208, net207, net13, net8, srclkneg,
      srclkpos, vdd, vss, net40, net82);
-sram_2port_sensor I2127 ( outB_0_, net207, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2127 ( outB[0], net207, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2126 ( outB_1_, net538, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2126 ( outB[1], net538, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2125 ( outB_2_, net582, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2125 ( outB[2], net582, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2124 ( outB_3_, net86, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2124 ( outB[3], net86, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2073 ( outA_6_, net10, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2073 ( outA[6], net10, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2070 ( outA_9_, net54, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2070 ( outA[9], net54, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2114 ( outB_13_, net474, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2114 ( outB[13], net474, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2065 ( outA_14_, net2520, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2065 ( outA[14], net2520, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2119 ( outB_8_, net119, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2119 ( outB[8], net119, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2078 ( outA_1_, net539, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2078 ( outA[1], net539, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2068 ( outA_11_, net2485, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2068 ( outA[11], net2485, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2123 ( outB_4_, net108, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2123 ( outB[4], net108, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2112 ( outB_15_, net375, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2112 ( outB[15], net375, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2115 ( outB_12_, net355, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2115 ( outB[12], net355, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2074 ( outA_5_, net21, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2074 ( outA[5], net21, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2067 ( outA_12_, net2302, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2067 ( outA[12], net2302, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2116 ( outB_11_, net331, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2116 ( outB[11], net331, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2071 ( outA_8_, net120, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2071 ( outA[8], net120, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2077 ( outA_2_, net583, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2077 ( outA[2], net583, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2064 ( outA_15_, net2000, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2064 ( outA[15], net2000, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2118 ( outB_9_, net53, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2118 ( outB[9], net53, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2121 ( outB_6_, net9, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2121 ( outB[6], net9, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2122 ( outB_5_, net20, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2122 ( outB[5], net20, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2079 ( outA_0_, net208, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2079 ( outA[0], net208, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2066 ( outA_13_, net1494, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2066 ( outA[13], net1494, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2069 ( outA_10_, net1488, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2069 ( outA[10], net1488, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2117 ( outB_10_, net186, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2117 ( outB[10], net186, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2076 ( outA_3_, net87, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2076 ( outA[3], net87, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2120 ( outB_7_, net31, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2120 ( outB[7], net31, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2113 ( outB_14_, net98, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2113 ( outB[14], net98, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2072 ( outA_7_, net32, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2072 ( outA[7], net32, clkneg[5], clkpos[5], vdd,
      vss);
-sram_2port_sensor I2075 ( outA_4_, net109, clkneg_5_, clkpos_5_, vdd,
+sram_2port_sensor I2075 ( outA[4], net109, clkneg[5], clkpos[5], vdd,
      vss);
 sram1b_2port_reg0 I1583 ( net2000, net375, vdd, vss, net720, net968);
 sram1b_2port_reg0 I1679 ( net2302, net355, vdd, vss, net720, net968);
@@ -1549,154 +1542,154 @@ sram1b_2port_reg0 I2031 ( net539, net538, vdd, vss, net720, net968);
 sram1b_2port_reg0 I1935 ( net109, net108, vdd, vss, net720, net968);
 sram1b_2port_reg0 I1967 ( net87, net86, vdd, vss, net720, net968);
 sram1b_2port_reg0 I1999 ( net583, net582, vdd, vss, net720, net968);
-sram_decoderB_GLS2 I2203 ( net114, net67, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_BBar_2_, Addr_B_3_, Addr_B_4_, vdd,
+sram_decoderB_GLS2 I2203 ( net114, net67, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_BBar[2], Addr_B[3], Addr_B[4], vdd,
      vss);
-sram_decoderB_GLS2 I2204 ( net147, net68, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_B_3_, Addr_B_4_,
+sram_decoderB_GLS2 I2204 ( net147, net68, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_BBar[2], Addr_B[3], Addr_B[4],
      vdd, vss);
-sram_decoderB_GLS2 I2205 ( net591, net71, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_B_2_, Addr_BBar_3_, Addr_B_4_, vdd,
+sram_decoderB_GLS2 I2205 ( net591, net71, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_B[2], Addr_BBar[3], Addr_B[4], vdd,
      vss);
-sram_decoderB_GLS2 I2206 ( net748, net75, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_B_2_, Addr_BBar_3_, Addr_B_4_,
+sram_decoderB_GLS2 I2206 ( net748, net75, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_B[2], Addr_BBar[3], Addr_B[4],
      vdd, vss);
-sram_decoderB_GLS2 I2207 ( net770, net79, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_BBar_2_, Addr_BBar_3_, Addr_B_4_,
+sram_decoderB_GLS2 I2207 ( net770, net79, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_BBar[2], Addr_BBar[3], Addr_B[4],
      vdd, vss);
-sram_decoderB_GLS2 I2202 ( net77, net66, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_B_2_, Addr_B_3_, Addr_B_4_, vdd,
+sram_decoderB_GLS2 I2202 ( net77, net66, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_B[2], Addr_B[3], Addr_B[4], vdd,
      vss);
-sram_decoderB_GLS2 I2209 ( net814, net84, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_B_2_, Addr_B_3_, Addr_BBar_4_, vdd,
+sram_decoderB_GLS2 I2209 ( net814, net84, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_B[2], Addr_B[3], Addr_BBar[4], vdd,
      vss);
-sram_decoderB_GLS2 I2210 ( net836, net85, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_B_2_, Addr_B_3_, Addr_BBar_4_,
+sram_decoderB_GLS2 I2210 ( net836, net85, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_B[2], Addr_B[3], Addr_BBar[4],
      vdd, vss);
-sram_decoderB_GLS2 I2211 ( net858, net89, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_BBar_2_, Addr_B_3_, Addr_BBar_4_,
+sram_decoderB_GLS2 I2211 ( net858, net89, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_BBar[2], Addr_B[3], Addr_BBar[4],
      vdd, vss);
-sram_decoderB_GLS2 I2212 ( net880, net90, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_B_3_, Addr_BBar_4_,
+sram_decoderB_GLS2 I2212 ( net880, net90, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_BBar[2], Addr_B[3], Addr_BBar[4],
      vdd, vss);
-sram_decoderB_GLS2 I2208 ( net792, net82, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_BBar_3_, Addr_B_4_,
+sram_decoderB_GLS2 I2208 ( net792, net82, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_BBar[2], Addr_BBar[3], Addr_B[4],
      vdd, vss);
-sram_decoderB_GLS2 I2213 ( net902, net91, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_B_2_, Addr_BBar_3_, Addr_BBar_4_,
+sram_decoderB_GLS2 I2213 ( net902, net91, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_B[2], Addr_BBar[3], Addr_BBar[4],
      vdd, vss);
-sram_decoderB_GLS2 I2214 ( net924, net95, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_B_2_, Addr_BBar_3_, Addr_BBar_4_,
+sram_decoderB_GLS2 I2214 ( net924, net95, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_B[2], Addr_BBar[3], Addr_BBar[4],
      vdd, vss);
-sram_decoderB_GLS2 I2215 ( net946, net100, ReadEn, clkneg_1_,
-     clkneg_2_, clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_BBar_2_, Addr_BBar_3_, Addr_BBar_4_,
+sram_decoderB_GLS2 I2215 ( net946, net100, ReadEn, clkneg[1],
+     clkneg[2], clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_BBar[2], Addr_BBar[3], Addr_BBar[4],
      vdd, vss);
-sram_decoderB_GLS2 I2216 ( net968, net101, ReadEn, clkneg_1_,
-     clkneg_2_, clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_BBar_1_, Addr_BBar_2_, Addr_BBar_3_,
-     Addr_BBar_4_, vdd, vss);
-sram_decoderB_GLS2 I2181 ( net30, net63, ReadEn, clkneg_1_, clkneg_2_,
-     clkneg_3_, clkpos_1_, clkpos_2_, clkpos_3_, Addr_B_0_,
-     Addr_BBar_0_, Addr_B_1_, Addr_B_2_, Addr_B_3_, Addr_B_4_, vdd,
+sram_decoderB_GLS2 I2216 ( net968, net101, ReadEn, clkneg[1],
+     clkneg[2], clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_BBar[1], Addr_BBar[2], Addr_BBar[3],
+     Addr_BBar[4], vdd, vss);
+sram_decoderB_GLS2 I2181 ( net30, net63, ReadEn, clkneg[1], clkneg[2],
+     clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
+     Addr_BBar[0], Addr_B[1], Addr_B[2], Addr_B[3], Addr_B[4], vdd,
      vss);
-inv_fo4 I2221 ( Addr_ABar_1_, clkneg_1_, clkpos_1_, Addr_A_1_, vdd,
+inv_fo4 I2221 ( Addr_ABar[1], clkneg[1], clkpos[1], Addr_A[1], vdd,
      vss);
-inv_fo4 I2222 ( Addr_ABar_2_, clkneg_1_, clkpos_1_, Addr_A_2_, vdd,
+inv_fo4 I2222 ( Addr_ABar[2], clkneg[1], clkpos[1], Addr_A[2], vdd,
      vss);
-inv_fo4 I2223 ( Addr_ABar_3_, clkneg_1_, clkpos_1_, Addr_A_3_, vdd,
+inv_fo4 I2223 ( Addr_ABar[3], clkneg[1], clkpos[1], Addr_A[3], vdd,
      vss);
-inv_fo4 I2224 ( Addr_ABar_4_, clkneg_1_, clkpos_1_, Addr_A_4_, vdd,
+inv_fo4 I2224 ( Addr_ABar[4], clkneg[1], clkpos[1], Addr_A[4], vdd,
      vss);
-inv_fo4 I2197 ( Addr_BBar_0_, clkneg_1_, clkpos_1_, Addr_B_0_, vdd,
+inv_fo4 I2197 ( Addr_BBar[0], clkneg[1], clkpos[1], Addr_B[0], vdd,
      vss);
-inv_fo4 I2220 ( Addr_BBar_4_, clkneg_1_, clkpos_1_, Addr_B_4_, vdd,
+inv_fo4 I2220 ( Addr_BBar[4], clkneg[1], clkpos[1], Addr_B[4], vdd,
      vss);
-inv_fo4 I2218 ( Addr_BBar_2_, clkneg_1_, clkpos_1_, Addr_B_2_, vdd,
+inv_fo4 I2218 ( Addr_BBar[2], clkneg[1], clkpos[1], Addr_B[2], vdd,
      vss);
-inv_fo4 I2219 ( Addr_BBar_3_, clkneg_1_, clkpos_1_, Addr_B_3_, vdd,
+inv_fo4 I2219 ( Addr_BBar[3], clkneg[1], clkpos[1], Addr_B[3], vdd,
      vss);
-inv_fo4 I2217 ( Addr_BBar_1_, clkneg_1_, clkpos_1_, Addr_B_1_, vdd,
+inv_fo4 I2217 ( Addr_BBar[1], clkneg[1], clkpos[1], Addr_B[1], vdd,
      vss);
-inv_fo4 I2176 ( Addr_ABar_0_, clkneg_1_, clkpos_1_, Addr_A_0_, vdd,
+inv_fo4 I2176 ( Addr_ABar[0], clkneg[1], clkpos[1], Addr_A[0], vdd,
      vss);
 sram_decoderA_GLS2 I2175 ( net724, net723, net58, net49, net720, net59,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_ABar[2], Addr_ABar[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2174 ( net693, net692, net39, net38, net691, net57,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_ABar[2], Addr_ABar[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2173 ( net664, net663, net6, net5, net662, net56,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_A_2_, Addr_ABar_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_A[2], Addr_ABar[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2172 ( net635, net634, net15, net14, net633, net52,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_A_2_, Addr_ABar_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_A[2], Addr_ABar[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2171 ( net93, net92, net61, net60, net604, net51,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_ABar_2_, Addr_A_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_ABar[2], Addr_A[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2170 ( net574, net573, net2, net1, net572, net50,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_ABar_2_, Addr_A_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_ABar[2], Addr_A[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2169 ( net545, net544, net4, net3, net543, net48,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_A_2_, Addr_A_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_A[2], Addr_A[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2168 ( net74, net73, net42, net41, net511, net44,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_A_2_, Addr_A_3_, Addr_ABar_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_A[2], Addr_A[3], Addr_ABar[4], vdd, vss);
 sram_decoderA_GLS2 I2167 ( net484, net483, net13, net8, net482, net40,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_ABar[2], Addr_ABar[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2166 ( net69, net65, net18, net17, net452, net36,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_ABar_2_, Addr_ABar_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_ABar[2], Addr_ABar[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2165 ( net425, net424, net47, net46, net423, net34,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_A_2_, Addr_ABar_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_A[2], Addr_ABar[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2164 ( net396, net395, net24, net19, net394, net27,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_A_2_, Addr_ABar_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_A[2], Addr_ABar[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2163 ( net64, net62, net26, net25, net364, net23,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_ABar_2_, Addr_A_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_ABar[2], Addr_A[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2162 ( net78, net76, net29, net28, net334, net16,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_ABar_2_, Addr_A_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_ABar[2], Addr_A[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2161 ( net81, net80, net45, net43, net304, net12,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_ABar_1_, Addr_A_2_, Addr_A_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_ABar[1], Addr_A[2], Addr_A[3], Addr_A[4], vdd, vss);
 sram_decoderA_GLS2 I2160 ( net72, net70, net37, net35, net275, net7,
-     ReadEn, RegWrtBar, WriteEn, clkneg_2_, clkneg_3_, clkneg_4_,
-     clkpos_2_, clkpos_3_, clkpos_4_, Addr_A_0_, Addr_ABar_0_,
-     Addr_A_1_, Addr_A_2_, Addr_A_3_, Addr_A_4_, vdd, vss);
+     ReadEn, RegWrtBar, WriteEn, clkneg[2], clkneg[3], clkneg[4],
+     clkpos[2], clkpos[3], clkpos[4], Addr_A[0], Addr_ABar[0],
+     Addr_A[1], Addr_A[2], Addr_A[3], Addr_A[4], vdd, vss);
 
 endmodule
 
