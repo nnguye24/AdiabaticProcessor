@@ -12,46 +12,25 @@
 // NETLIST TIME: Feb 12 14:51:54 2026
 `timescale 1ns / 1ns 
 
-module flipflop2b ( 
-output   Out, 
-output   OutBar, 
-input   Fclkneg, 
-input   Fclkpos, 
-input   In, 
-input   Mclkneg, 
-input   Mclkpos, 
-input   Tclkneg, 
-input   Tclkpos, 
-input   vdd, 
-input   vss );
-
-wire net15 ;
-
-wire net024 ;
-
-wire net19 ;
-
-
-specify 
-    specparam CDS_LIBNAME  = "MIPS25";
-    specparam CDS_CELLNAME = "flipflop2b";
-    specparam CDS_VIEWNAME = "schematic";
-endspecify
-
-ctranif1  M12 ( .b(vss), .d(vss), .g(Out), .s(OutBar));
-ctranif1  M10 ( .b(vss), .d(Out), .g(net024), .s(vss));
-ctranif1  M8 ( .b(vss), .d(net024), .g(Fclkneg), .s(OutBar));
-ctranif1  M7 ( .b(vss), .d(net024), .g(Fclkpos), .s(net19));
-ctranif1  M6 ( .b(vss), .d(net19), .g(net15), .s(Mclkneg));
-ctranif1  M4 ( .b(vss), .d(Mclkneg), .g(net19), .s(net15));
-ctranif1  M1 ( .b(vss), .d(net15), .g(Tclkpos), .s(In));
-ctranif0  M11 ( .b(vdd), .s(OutBar), .g(Out), .d(vdd));
-ctranif0  M9 ( .b(vdd), .s(vdd), .g(net024), .d(Out));
-ctranif0  M5 ( .b(vdd), .s(Mclkpos), .g(net15), .d(net19));
-ctranif0  M3 ( .b(vdd), .s(net15), .g(net19), .d(Mclkpos));
-ctranif0  M2 ( .b(vdd), .s(In), .g(Tclkneg), .d(net15));
+module flipflop2b ( Out, OutBar, Fclkneg, Fclkpos, In, Mclkneg, Mclkpos,
+     Tclkneg, Tclkpos, vdd, vss );
+	
+  input Fclkneg, Fclkpos, Tclkpos, Tclkneg, In, Mclkneg, Mclkpos, vdd, vss;
+  output reg Out, OutBar; 
+    
+  reg node;
+    
+  always @(posedge Mclkpos) begin	// changed from Tclk, maybe a good change
+          node <= In;
+  end
+    
+  always @(posedge Fclkpos) begin
+          Out <= node;
+          OutBar <= ~node;
+  end
 
 endmodule
+
 // Library - MIPS25, Cell - Register16b, View - schematic
 // LAST TIME SAVED: Jul  4 10:48:34 2025
 // NETLIST TIME: Feb 12 14:51:54 2026
@@ -169,7 +148,7 @@ endmodule
 `timescale 1ns / 1ns 
 
 module flipflop_En2b ( 
-output   Out, 
+output  reg Out, 
 input   En, 
 input   EnInv, 
 input   Fclkneg, 
@@ -182,39 +161,15 @@ input   Tclkpos,
 input   vdd, 
 input   vss );
 
-wire net069 ;
+  reg node;
 
-wire net19 ;
+  always @(posedge Mclkpos) begin
+    if (En) node <= In;
+  end
 
-wire net036 ;
-
-wire net15 ;
-
-wire net024 ;
-
-
-specify 
-    specparam CDS_LIBNAME  = "MIPS25";
-    specparam CDS_CELLNAME = "flipflop_En2b";
-    specparam CDS_VIEWNAME = "schematic";
-endspecify
-
-ctranif1  MN4 ( .b(vss), .d(net069), .g(EnInv), .s(Out));
-ctranif1  MN2 ( .b(vss), .d(In), .g(En), .s(net069));
-ctranif1  M12 ( .b(vss), .d(vss), .g(Out), .s(net036));
-ctranif1  M10 ( .b(vss), .d(Out), .g(net024), .s(vss));
-ctranif1  M8 ( .b(vss), .d(net024), .g(Fclkneg), .s(net036));
-ctranif1  M7 ( .b(vss), .d(net024), .g(Fclkpos), .s(net19));
-ctranif1  M6 ( .b(vss), .d(net19), .g(net15), .s(Mclkneg));
-ctranif1  M4 ( .b(vss), .d(Mclkneg), .g(net19), .s(net15));
-ctranif1  M1 ( .b(vss), .d(net15), .g(Tclkpos), .s(net069));
-ctranif0  MP3 ( .b(vdd), .s(net069), .g(EnInv), .d(In));
-ctranif0  MP4 ( .b(vdd), .s(Out), .g(En), .d(net069));
-ctranif0  M11 ( .b(vdd), .s(net036), .g(Out), .d(vdd));
-ctranif0  M9 ( .b(vdd), .s(vdd), .g(net024), .d(Out));
-ctranif0  M5 ( .b(vdd), .s(Mclkpos), .g(net15), .d(net19));
-ctranif0  M3 ( .b(vdd), .s(net15), .g(net19), .d(Mclkpos));
-ctranif0  M2 ( .b(vdd), .s(net069), .g(Tclkneg), .d(net15));
+  always @(posedge Fclkpos) begin
+    Out <= node;
+  end
 
 endmodule
 // Library - MIPS25, Cell - Register_En16b, View - schematic
@@ -414,7 +369,7 @@ input   vdd,
 input   vss );
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "inv_fo64";
     specparam CDS_VIEWNAME = "schematic";
@@ -793,7 +748,7 @@ input   vdd,
 input   vss );
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "inv_fo4";
     specparam CDS_VIEWNAME = "schematic";
@@ -1447,16 +1402,18 @@ sram1b_2port_reg0 I1967 ( net87, net86, vdd, vss, net720, net968);
 sram1b_2port_reg0 I1999 ( net583, net582, vdd, vss, net720, net968);
 */
 sram_array array(outA, outB,
-     // wordA
+     // wordA (retained for structural compatibility, not used for address decode)
      {net7,net275,net12,net304,net16,net334,net23,net364,net27,net394,net34,net423,
      net36,net452,net40,net482,net44,net511,net48,net543,net50,net572,net51,net604,
      net52,net633,net56,net662,net57,net691,net59,net720},
      // wordB
      {net63,net30,net66,net77,net67,net114,net68,net147,net71,net591,net75,net748,
      net79,net770,net82,net792,net84,net814,net85,net836,net89,net858,net90,net880,
-     net91,net902,net95,net924,net100,net946,net101,net968}, 
+     net91,net902,net95,net924,net100,net946,net101,net968},
      // read, write, and input.... and also srclk
-     ReadEn, WriteEn, in, srclkneg, srclkpos
+     ReadEn, WriteEn, in, srclkneg, srclkpos,
+     // direct address ports (bypasses structural decoders which produce X in digital sim)
+     Addr_A, Addr_B
 );
 sram_decoderB_GLS2 I2203 ( net114, net67, ReadEn, clkneg[1], clkneg[2],
      clkneg[3], clkpos[1], clkpos[2], clkpos[3], Addr_B[0],
@@ -1624,7 +1581,7 @@ input   vdd,
 input   vss );
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "inv_fo16";
     specparam CDS_VIEWNAME = "schematic";
@@ -1681,7 +1638,7 @@ input   vss );
 wire net014 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nand2b";
     specparam CDS_VIEWNAME = "schematic";
@@ -1869,7 +1826,7 @@ wire net014 ;
 wire net017 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "and2b";
     specparam CDS_VIEWNAME = "schematic";
@@ -1930,7 +1887,7 @@ wire net016 ;
 wire net022 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nor3b";
     specparam CDS_VIEWNAME = "schematic";
@@ -1973,7 +1930,7 @@ wire net016 ;
 wire net043 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "xor2b";
     specparam CDS_VIEWNAME = "schematic";
@@ -2034,7 +1991,7 @@ input   vdd,
 input   vss );
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "inv";
     specparam CDS_VIEWNAME = "schematic";
@@ -2064,7 +2021,7 @@ wire net018 ;
 wire net014 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nand3b";
     specparam CDS_VIEWNAME = "schematic";
@@ -2095,7 +2052,7 @@ input   vss );
 wire net016 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nor2b_fo4";
     specparam CDS_VIEWNAME = "schematic";
@@ -2194,7 +2151,7 @@ wire net017 ;
 wire net016 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "or2b";
     specparam CDS_VIEWNAME = "schematic";
@@ -2403,7 +2360,6 @@ module adder ( cout, out[0], out[1], out[2], out[3], out[4], out[5],
      clkpos[6], clkpos[7], vdd, vss );
 
 output cout;
-
 input cin;
 input vdd;
 input vss;
@@ -3008,10 +2964,11 @@ endspecify
 mux3to1_16b I13 ( out[15:0], {vss, instr_in[15:1]}, alu_out[15:0],
      clkneg[5], clkneg[5], clkpos[5], clkpos[5], alu_muxout[15:0],
      mux3_0, mux3_1, vdd, vss);
-cond_inv16b I7 ( b_invout[15:0], b_muxout[15:0], {STL, STL, STL, STL,
+// playing with behaviora version of conditional inverter because it's not receiving the bennett clock.
+cond_inv16b_behav I7 ( b_invout[15:0], b_muxout[15:0], {STL, STL, STL, STL,
      STL, STL, STL, STL, STL, STL, STL, STL, STL, STL, STL, STL},
      clkneg[1], clkpos[1], vdd, vss);
-cond_inv16b I6 ( a_invout[15:0], a_muxout[15:0], {SUB, SUB, SUB, SUB,
+cond_inv16b_behav I6 ( a_invout[15:0], a_muxout[15:0], {SUB, SUB, SUB, SUB,
      SUB, SUB, SUB, SUB, SUB, SUB, SUB, SUB, SUB, SUB, SUB, SUB},
      clkneg[1], clkpos[1], vdd, vss);
 and16b I9 ( and_out[15:0], a_muxout[15:0], b_muxout[15:0], clkneg[6],
@@ -3405,7 +3362,7 @@ input   vss );
 wire net014 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nand2b_fo4";
     specparam CDS_VIEWNAME = "schematic";
@@ -3434,7 +3391,7 @@ input   vss );
 wire net016 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nor2b";
     specparam CDS_VIEWNAME = "schematic";
@@ -3469,7 +3426,7 @@ wire net016 ;
 wire net019 ;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "nor4b";
     specparam CDS_VIEWNAME = "schematic";
@@ -3619,8 +3576,8 @@ input Zero_DetectBar;
 input vdd;
 input vss;
 
-output  [0:7]  S;
-output  [0:7]  Nout;
+output  [7:0]  S;   // reversed this endianness as well. little endian from big.
+output  [7:0]  Nout;
 
 input  [0:9]  clkneg;
 input  [0:9]  clkpos;
@@ -3966,7 +3923,8 @@ nor2b I105 ( net224, out_lbrd, out_other4, clkneg[4], clkpos[4], vdd,
      vss);
 nor2b I102 ( net229, out_Decode, out_Memadr, clkneg[4], clkpos[4], vdd,
      vss);
-nor2b I101 ( net376, out_lbrd, out_S6, clkneg[4], clkpos[4], vdd, vss);
+nor2b I101 ( net376, out_lbrd, out_S6, clkneg[4], clkpos[4], vdd,
+     vss);
 nor2b I95 ( out_other4, net319, net249, clkneg[3], clkpos[3], vdd,
      vss);
 nor2b I92 ( net463, net246, net259, clkneg[3], clkpos[3], vdd, vss);
@@ -3997,7 +3955,8 @@ nand2b I80 ( net308, out_Rtype, out_Decode, clkneg[2], clkpos[2], vdd,
      vss);
 nand2b I79 ( net399, out_Addi, out_Memadr, clkneg[2], clkpos[2], vdd,
      vss);
-nand2b I78 ( net404, OP1, out_Decode, clkneg[2], clkpos[2], vdd, vss);
+nand2b I78 ( net404, OP1, out_Decode, clkneg[2], clkpos[2], vdd,
+     vss);
 nand2b I75 ( net409, net466, net410, clkneg[2], clkpos[2], vdd, vss);
 nand2b I68 ( net16, net54, out_Decode, clkneg[2], clkpos[2], vdd, vss);
 nand2b I56 ( net9, out_S6, net424, clkneg[1], clkpos[1], vdd, vss);
@@ -4034,47 +3993,47 @@ module mips ( Addi, Decode, Fclk, LB, MemWrite, Memadr, N[0], N[1],
      nand_out, not_in1, not_in2, not_out1, not_out2, other4, zeros,
      srclkneg, srclkpos );
 
-inout Addi;
-inout Decode;
-inout Fclk;
-inout LB;
-inout MemWrite;
-inout Memadr;
-inout OP3_spy;
-inout OP5_spy;
-inout Reset;
-inout Rtype;
-inout S3;
-inout S4;
-inout S5;
-inout S6;
-inout SB;
-inout Tclk;
-inout VDD;
-inout VSS;
-inout fetch;
-inout fetch1;
-inout lbrd;
-inout nand_in1;
-inout nand_in2;
-inout nand_out;
-inout not_in1;
-inout not_in2;
-inout not_out1;
-inout not_out2;
-inout other4;
-inout zeros;
+output Addi;
+output Decode;
+input Fclk;
+output LB;
+output MemWrite;
+output Memadr;
+output OP3_spy;
+output OP5_spy;
+input Reset;
+output Rtype;
+output S3;
+output S4;
+output S5;
+output S6;
+output SB;
+input Tclk;
+input VDD;
+input VSS;
+output fetch;
+output fetch1;
+output lbrd;
+input nand_in1;
+input nand_in2;
+output nand_out;
+input not_in1;
+input not_in2;
+output not_out1;
+output not_out2;
+output other4;
+output zeros;
 
 input srclkneg;
 input srclkpos;
 
 inout  [15:0]  io;
-inout  [0:7]  N;
-inout  [15:0]  PC;
-inout  [15:0]  data_in;
-inout  [0:7]  S;
-inout  [1:10]  clkneg;
-inout  [1:10]  clkpos;
+output  [0:7]  N;
+output  [15:0]  PC;
+input  [15:0]  data_in;
+output  [7:0]  S;   // reversed the endianess... idk what this means
+input  [1:10]  clkneg;
+input  [1:10]  clkpos;
 
 wire net018 ;
 
@@ -4163,7 +4122,7 @@ wire [30:0]  instr;
 wire [15:0]  PCtoALU;
 
 
-specify 
+specify
     specparam CDS_LIBNAME  = "MIPS25";
     specparam CDS_CELLNAME = "mips";
     specparam CDS_VIEWNAME = "schematic";
@@ -4451,6 +4410,8 @@ endmodule
 // End HDL models
 // Behavioral Model for SRAM Array!
 
+// Behavioral SRAM array. wordA/wordB retained for port compatibility with structural
+// instantiation but Addr_A/Addr_B are used directly to bypass X from structural decoders.
 module sram_array(
     output reg [15:0] outA,
     output reg [15:0] outB,
@@ -4459,56 +4420,64 @@ module sram_array(
     input ReadEn,
     input WriteEn,
     input [15:0] in,
-    input srclkneg, 
-    input srclkpos
+    input srclkneg,
+    input srclkpos,
+    input [4:0] Addr_A,
+    input [4:0] Addr_B
 );
 
-reg [15:0] sram [0:31]; 
-reg [4:0] convA; 
-reg [4:0] convB; 
-
-integer k; 
-integer i;
+reg [15:0] sram [0:31];
+integer k;
 
 logic write_hold;
 logic read_hold;
 
-initial begin 
+initial begin
     for (k = 0; k < 32; k = k + 1) begin
         sram[k] = 16'h0000;
     end
 end
 
-
-always @(*) begin
-    convA = 5'd0;
-    convB = 5'd0;
-    for (i = 0; i < 32; i = i + 1) begin
-        if (wordA[i]) convA = i[4:0];
-        if (wordB[i]) convB = i[4:0];
+// Read at posedge srclkneg (phase 6) so outA/outB are stable by posedge Mclk (phase 9).
+// Register16b samples a/b at posedge Mclk, so data must arrive before that edge.
+always @(posedge srclkneg) begin
+    if (ReadEn) begin
+        outA <= sram[Addr_A];
+        outB <= sram[Addr_B];
     end
 end
 
-always @(posedge WriteEn or posedge ReadEn or posedge srclkneg) begin
-    write_hold <= WriteEn;
-    read_hold <= ReadEn;    
-end
-
+// Write at posedge srclkpos (=posedge Mclk). alu_out is captured by alu Register16b
+// at posedge Mclk as well, but with non-blocking assignments the write gets the
+// previous cycle's alu_out (which is the correct ADDIEX result during ADDIWR).
 always @(posedge srclkpos) begin
-    if (read_hold) begin
-        outA <= sram[convA];
-        outB <= sram[convB];
-    end
-
-    if (write_hold) begin
-        // sram[0] <= 16'h0000; // Warning: This wipes index 0 every write cycle!
-        if (convA != 5'd0) begin
-            sram[convA] <= in;
-        end
-        if (convB != 5'd0) begin
-            sram[convB] <= in;
-        end
+    // Guard: only write when WriteEn, Addr_A, and in are all valid (no X bits)
+    if (WriteEn === 1'b1 && ^Addr_A !== 1'bx && Addr_A !== 5'd0 && ^in !== 1'bx) begin
+        sram[Addr_A] <= in;
     end
 end
+
+endmodule
+
+// --- Behavioral surrogate for cond_inv16b (identical ports; swap type in testbench) ---
+// Per bit: when b=1 output ~a (subtract operand invert), when b=0 pass a. Clocks and
+// supplies are unused; for cycle-accurate adiabatic sim, use structural cond_inv16b.
+`timescale 1ns / 1ns
+
+module cond_inv16b_behav (
+output  [15:0]  out,
+input  [15:0]  a,
+input  [15:0]  b,
+input   clkneg,
+input   clkpos,
+input   vdd,
+input   vss );
+
+logic [15:0] out_temp;
+always @(posedge clkpos) begin
+    out_temp = b ? ~a : a;
+end
+
+assign out = out_temp;
 
 endmodule

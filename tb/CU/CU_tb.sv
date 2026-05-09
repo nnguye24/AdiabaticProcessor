@@ -1,5 +1,6 @@
-`include "../bennettclock/bennettClock.sv"
-
+`include "../../bennettclock/bennettClock.sv"
+`include "../../bennettclock/bennettClock_square.sv"
+`include "../../bennettclock/bennettClock_noX.sv"
 
 module CU_tb();
 // Inputs
@@ -24,13 +25,17 @@ supply0 vss;
 localparam WIDTH = 10;
 
 // Outputs
-wire ReadEn, WriteEn, out_ALUCont0, out_ALUCont1, out_ALUCont2, out_ALUSrcA, 
+wire ReadEn, WriteEn, out_ALUCont0, out_ALUCont1, out_ALUCont2, out_ALUSrcA,
     out_ALUSrcB0, out_ALUSrcB1, out_Addi, out_Branch_PCSrc0, out_Decode, out_IRWr0,
     out_IRWr1, out_IorD, out_LB, out_MemWrite, out_Memadr, out_MemtoReg, out_PCSrc1,
-    out_PCWrite, out_PC_En, out_PC_EnBar, out_RegDst, out_RegWriteBar, out_Rtype, 
+    out_PCWrite, out_PC_En, out_PC_EnBar, out_RegDst, out_RegWriteBar, out_Rtype,
     out_S3, out_S4, out_S5, out_S6, out_SB, out_STL, out_SUB, out_fetch, out_fetch1,
     out_lbrd, out_other4, out_zeros;
 
+bennett_clock_square #(.WIDTH(WIDTH)) bennett (
+    .clk(clk), .reset(reset), .clkp(clkpos), .Mclk(Mclk), .instFlag(instFlag)
+);
+/*
 bennett_clock #(
     .PHASES(WIDTH)
 ) bennett (
@@ -40,6 +45,7 @@ bennett_clock #(
     .Mclk(Mclk),
     .instFlag(instFlag)
 );
+*/
 
 // Instantiate the Control Unit
 control_unit dut (Nout[0], Nout[1], Nout[2], Nout[3], Nout[4], Nout[5], Nout[6], Nout[7],
@@ -91,136 +97,113 @@ initial begin
     // Initialize all inputs
     Zero_DetectBar = 0;
     Reset = 1;
-    OP = 4'b0000;  // R-type initially
-    F = 4'b0000;   // ADD function
+    OP = 4'b0100;  // R-type initially
+    F = 4'b0101;   // ADD function
 
     $display("=== RESET PHASE ===");
     // Reset cycles (equivalent to first two cycles in original)
-    @(posedge instFlag);  // Reset cycle 1
-    @(posedge instFlag);  // Reset cycle 2
+    @(posedge instFlag); #1;
+    $display("  Reset cycle 1: S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Reset cycle 2: S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
     $display("=== NORMAL OPERATION STARTS ===");
     Reset = 0;
 
 
     $display("=== TESTING R-Type OP ===");
-    $display("INIT -> Fetch1");
-    @(posedge instFlag);
-    $display("Fetch1 -> Fetch2");
-    @(posedge instFlag);
-    $display("Fetch2 -> Decode");
-    @(posedge instFlag);
-    $display("Decode -> RTYPEX");
-    @(posedge instFlag)
-    $display("RTYPEX -> RTYPEWR");
-    @(posedge instFlag);
-    $display("Back to Fetch1");
-    @(posedge instFlag);
+    @(posedge instFlag); #1;
+    $display("  INIT -> Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch1 -> Fetch2:  S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch2 -> Decode:  S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Decode -> RTYPEX:  S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  RTYPEX -> RTYPEWR: S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Back to Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
 
 
     $display("=== TESTING LOAD INSTRUCTION ===");
-    // Fetch1 (Load/Store instruction)
-    $display("Fetch1 (Load/Store)");
-    OP = 4'b1000;  
-    @(posedge instFlag);
-
-    $display("Fetch2 (Load)");
-    @(posedge instFlag);
-
-    $display("Decode (Load)");
-    @(posedge instFlag);
-
-    $display("MemAdr (Load)");
-    @(posedge instFlag);
-
-    $display("LBRD (Load Byte Read)");
-    @(posedge instFlag);
-
-    $display("LBWR (Load Byte Write)");
-    @(posedge instFlag);
-
-    $display("Back to Fetch1");
-    @(posedge instFlag);
+    OP = 4'b1000;
+    @(posedge instFlag); #1;
+    $display("  Fetch1 (Load):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch2 (Load):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Decode (Load):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  MemAdr (Load):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  LBRD (Load):       S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  LBWR (Load):       S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Back to Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
 
     $display("=== TESTING STORE INSTRUCTION ===");
-    $display("Fetch1 (Store)");
-    OP = 4'b1100;  
-    @(posedge instFlag);
-
-    $display("Fetch2 (Store)");
-    @(posedge instFlag);
-
-    $display("Decode (Store)");
-    @(posedge instFlag);
-
-    $display("MemAdr (Store)");
-    @(posedge instFlag);
-
-    $display("SBWR (Write)");
-    @(posedge instFlag);
-
-    $display("Back to Fetch1");
-    @(posedge instFlag);
+    OP = 4'b1100;
+    @(posedge instFlag); #1;
+    $display("  Fetch1 (Store):    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch2 (Store):    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Decode (Store):    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  MemAdr (Store):    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  SBWR (Store):      S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Back to Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
 
     $display("=== TESTING BEQ INSTRUCTION ===");
-    $display("Fetch1 (BEQ)");
-    OP = 4'b0010;  
-    @(posedge instFlag);
-
-    $display("Fetch2 (BEQ)");
-    @(posedge instFlag);
-
-    $display("Decode (BEQ)");
-    @(posedge instFlag);
-
-    $display("BEQEX (Load)");
-    @(posedge instFlag);
-
-    $display("Back to Fetch1");
-    @(posedge instFlag);
+    OP = 4'b0010;
+    @(posedge instFlag); #1;
+    $display("  Fetch1 (BEQ):      S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch2 (BEQ):      S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Decode (BEQ):      S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  BEQEX (BEQ):       S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Back to Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
 
 
     $display("=== TESTING JUMP INSTRUCTION ===");
-    $display("Fetch1 (Jump)");
-    OP = 4'b0001;  
-    @(posedge instFlag);
-
-    $display("Fetch2 (Jump)");
-    @(posedge instFlag);
-
-    $display("Decode (Jump)");
-    @(posedge instFlag);
-
-    $display("JEX");
-    @(posedge instFlag);
-
-    $display("Back to Fetch1");
-    @(posedge instFlag);
+    OP = 4'b0001;
+    @(posedge instFlag); #1;
+    $display("  Fetch1 (Jump):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch2 (Jump):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Decode (Jump):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  JEX (Jump):        S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Back to Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
 
     $display("=== TESTING ADDI INSTRUCTION ===");
-    $display("Fetch1 (ADDI)");
-    OP = 4'b0100;  
-    @(posedge instFlag);
-
-    $display("Fetch2 (ADDI)");
-    @(posedge instFlag);
-
-    $display("Decode (ADDI)");
-    @(posedge instFlag);
-
-    $display("ADDIEX");
-    @(posedge instFlag);
-
-    $display("ADDIWR");
-    @(posedge instFlag);
-
-    $display("Back to Fetch1");
-    @(posedge instFlag);
+    OP = 4'b0100;
+    @(posedge instFlag); #1;
+    $display("  Fetch1 (ADDI):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Fetch2 (ADDI):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Decode (ADDI):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  ADDIEX (ADDI):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  ADDIWR (ADDI):     S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
+    @(posedge instFlag); #1;
+    $display("  Back to Fetch1:    S=%b (%02h)  Nout=%b (%02h)", S, S, Nout, Nout);
 
     $display("=== TEST COMPLETE ===");
     $finish;

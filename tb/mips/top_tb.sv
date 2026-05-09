@@ -7,40 +7,31 @@ module mips_tb();
 supply1 VDD;
 supply0 VSS;
 
-localparam WIDTH = 11; // Need 11 phases: DUT uses clkpos[1:10], so Bennett must generate [0:10]
-// Clock Related Signals
-logic SRAM_clkneg;
-logic SRAM_clkpos;
-logic [0:1] padclkneg;
-logic [0:1] padclkpos;
+localparam WIDTH = 10;
 
-logic clk;
-logic reset;
-logic [0:WIDTH-1] clkneg;
-logic [0:WIDTH-1] clkpos;
-logic Mclk;
-logic instFlag;
-logic srclkneg, srclkpos;
+// Clock signals
+logic SRAM_clkneg, SRAM_clkpos;
+logic [0:1] padclkneg, padclkpos;
+logic clk, reset;
+// [WIDTH-1:0] matches the [9:0] output of bennett_clock_noX and CU_tb convention.
+logic [WIDTH-1:0] clkneg, clkpos;
+logic Mclk, instFlag;
 
-// Input signals
-logic [15:0] in;
-logic Fclk;
-logic MemWrite;
+// DUT IO
 logic Reset;
-
 tri [15:0] io;
-logic lbrd;
 logic nand_in1, nand_in2;
 logic not_in1, not_in2;
-logic Tclk;
 
-// Output signals
+// DUT outputs
 logic [15:0] PC;
+logic MemWrite;
 logic nand_out;
 logic not_out1, not_out2;
 logic OP3_spy, OP5_spy;
 
-logic io_en;
+wire Fclk = instFlag;
+wire Tclk = (clkpos[8] === 1'bX) ? 1'b0 : clkpos[8];
 
 // Bennett clock instantiation
 bennett_clock_square #(
@@ -56,16 +47,63 @@ bennett_clock_square #(
 assign clkneg = ~clkpos;
 assign SRAM_clkneg = (Mclk ^ clkpos[6]) & clkpos[6];
 assign SRAM_clkpos = ~SRAM_clkneg;
-assign Tclk  = (clkpos[8] === 1'bX ) ? 1'b0 : clkpos[8];
-assign Fclk = instFlag;
-assign padclkpos = VDD;
-assign padclkneg = VSS;
+assign padclkpos = {VDD, VDD};  // both bits high so pad driver inv_fo64/pad_driver_IO work
+assign padclkneg = {VSS, VSS};  // both bits low
 assign not_in1 = nand_in1;
 assign not_in2 = nand_in2;
-// Tri-state logic for inout
-assign io  = (io_en) ? in : 1'bz;
 
+
+// The testbench acts as the external instruction memory.
+// MemWrite=0: processor reads — we drive io with the appropriate instruction word.
+// MemWrite=1: processor writes — io driven by chip, testbench tristates.
+//
+// IRWr0=1 in Fetch1 state: lower instruction half captured at posedge Tclk.
+// IRWr1=1 in Fetch2 state: upper instruction half captured at posedge Tclk.
+// Drive io = upper half when IRWr1 active, lower half otherwise (in read mode).
+//
+// Memory is 16-bit word addressed. PC increments by 2 each fetch half
+// (byte addressed), so the array index is pc_internal >> 1.
+// =========================================================================
+
+reg [15:0] imem [0:63];
+wire [15:0] pc_internal = dut.I0.I7.out;
+
+initial begin : init_imem
+    integer j;
+    for (j = 0; j < 64; j = j + 1) imem[j] = 16'h0000;
+
+    // Instruction 0: ADDI $1, $0, 5   (0x2001_0005)
+    imem[0] = 16'h0005;   // lower half  (PC = 0)
+    imem[1] = 16'h2001;   // upper half  (PC = 2)
+
+    // Instruction 1: ADDI $2, $0, 3   (0x2002_0003)
+    imem[2] = 16'h0003;   // lower half  (PC = 4)
+    imem[3] = 16'h2002;   // upper half  (PC = 6)
+
+    // Instruction 2: ADDI $3, $0, 10  (0x2003_000A)
+    imem[4] = 16'h000A;   // lower half  (PC = 8)
+    imem[5] = 16'h2003;   // upper half  (PC = 10)
+end
+
+// Continuously drive io in read mode (MemWrite != 1).
+// IRWr1 active (Fetch2 state): drive upper instruction half.
+// Otherwise: drive lower instruction half (active during Fetch1 capture,
+// and harmless during Execute/Write states where IRWr0=IRWr1=0).
+wire [5:0] pc_word = (pc_internal !== 16'bx) ? (pc_internal >> 1) : 6'b0;
+assign io = (dut.MemWrite_chip !== 1'b1) ?
+                ((dut.I0.IRWr1 === 1'b1) ? imem[pc_word + 1] : imem[pc_word]) :
+                16'bz;
+
+
+// Bennett clkpos in this TB is [9:0] (matches bennett_clock_square.clkp).
+// mips_driver_pad uses [1:10]; bit 1 is the MSB, so the port connection
+//   .clkpos({clkpos[0], ..., clkpos[9]})
+// maps TB clkpos[0] -> chip clkpos[1], TB clkpos[1] -> chip clkpos[2], ... TB clkpos[9] -> chip clkpos[10].
+// ALU cond_inv16b uses chip clkpos[1]/clkneg[1] — compare waveforms to mips_tb.clkpos[0], not clkpos[1].
+
+// =========================================================================
 // DUT
+// =========================================================================
 mips_driver_pad dut (
     .MemWrite(MemWrite),
     .OP3_spy(OP3_spy),
@@ -74,7 +112,6 @@ mips_driver_pad dut (
     .nand_out(nand_out),
     .not_out1(not_out1),
     .not_out2(not_out2),
-
     .io(io[15:0]),
     .Fclk(Fclk),
     .Reset(Reset),
@@ -83,8 +120,8 @@ mips_driver_pad dut (
     .Tclk(Tclk),
     .VDD(VDD),
     .VSS(VSS),
-    .clkneg(clkneg[1:10]),
-    .clkpos(clkpos[1:10]),
+    .clkneg({clkneg[0],clkneg[1],clkneg[2],clkneg[3],clkneg[4],clkneg[5],clkneg[6],clkneg[7],clkneg[8],clkneg[9]}),
+    .clkpos({clkpos[0],clkpos[1],clkpos[2],clkpos[3],clkpos[4],clkpos[5],clkpos[6],clkpos[7],clkpos[8],clkpos[9]}),
     .nand_in1(nand_in1),
     .nand_in2(nand_in2),
     .not_in1(not_in1),
@@ -93,7 +130,9 @@ mips_driver_pad dut (
     .padclkpos(padclkpos)
 );
 
-// Clock generation: 10ns period
+// =========================================================================
+// Clock generation: 10 ns period
+// =========================================================================
 initial begin
     clk = 0;
     forever #5 clk = ~clk;
@@ -105,146 +144,177 @@ initial begin
     $dumpvars(0, mips_tb);
 end
 
-// Convenience: count instruction cycles
-integer instr_cycle;
-initial instr_cycle = 0;
-always @(posedge Fclk) begin
-    instr_cycle <= instr_cycle + 1;
+
+// PC register flops have no async reset in netlist; iverilog needs a constant
+// hierarchical index, so one initial per bit (via generate).
+genvar gv_pc;
+generate
+    for (gv_pc = 0; gv_pc < 16; gv_pc = gv_pc + 1) begin : g_pc_init
+        initial begin
+            dut.I0.I7.I0.I0[gv_pc].node = 1'b0;
+            dut.I0.I7.I0.I0[gv_pc].Out = 1'b0;
+        end
+    end
+endgenerate
+
+
+initial begin : init_structural
+    integer k;
+    // --- SRAM register file ---
+    for (k = 0; k < 32; k = k + 1)
+        dut.I0.I24.array.sram[k] = 16'h0000;
 end
 
-// Helper task: peek into SRAM (register file) contents
-// Hierarchy: dut.I0.I24.array.sram[i]
+// =========================================================================
+// Debug helpers
+// =========================================================================
+integer instr_cycle;
+initial instr_cycle = 0;
+always @(posedge Fclk) instr_cycle <= instr_cycle + 1;
+
+// FSM state vector 
+wire [7:0] fsm_state = {
+    dut.I0.I5.S[7], dut.I0.I5.S[6],
+    dut.I0.I5.S[5], dut.I0.I5.S[4],
+    dut.I0.I5.S[3], dut.I0.I5.S[2],
+    dut.I0.I5.S[1], dut.I0.I5.S[0]
+};
+
+// Instruction register halves 
+wire [15:0] instr_lo = dut.I0.I3.out[15:0];
+wire [15:0] instr_hi = dut.I0.I3.out[31:16];
+
+// Nout (next-state) vector
+wire [7:0] nout_vec = {
+    dut.I0.I5.Nout[7], dut.I0.I5.Nout[6],
+    dut.I0.I5.Nout[5], dut.I0.I5.Nout[4],
+    dut.I0.I5.Nout[3], dut.I0.I5.Nout[2],
+    dut.I0.I5.Nout[1], dut.I0.I5.Nout[0]
+};
+
+// Monitor on each Fclk edge
+always @(posedge Fclk) begin
+    #1;
+    $display("-----------------------------------------------");
+    $display("[%0t] Cycle #%0d | FSM=%b (%0d) | Nout=%b | PC_int=%0d | PC_pad=%h",
+        $time, instr_cycle, fsm_state, fsm_state, nout_vec, pc_internal, PC);
+    $display("  MemWrite=%b MemWchip=%b out_MW=%b | IRWr0=%b IRWr1=%b | io=%h",
+        MemWrite, dut.MemWrite_chip, dut.I0.I5.out_MemWrite,
+        dut.I0.IRWr0, dut.I0.IRWr1, io);
+    $display("  Instr: hi=%h lo=%h  (full=%h)",
+        instr_hi, instr_lo, {instr_hi, instr_lo});
+    $display("  data_in(mips)=%h  io_chip=%h",
+        dut.I0.data_in, dut.io_chip);
+    $display("  SRAM outA=%h outB=%h | ALU a=%h b=%h a_reg=%h b_reg=%h",
+        dut.I0.I24.outA, dut.I0.I24.outB,
+        dut.I0.I4.a, dut.I0.I4.b,
+        dut.I0.I4.a_regout, dut.I0.I4.b_regout);
+    $display("  out_fetch=%b out_fetch1=%b out_Decode=%b out_zeros=%b",
+        dut.I0.I5.out_fetch,
+        dut.I0.I5.out_fetch1,
+        dut.I0.I5.out_Decode,
+        dut.I0.I5.out_zeros);
+    $display("  WriteEn=%b RegWriteBar=%b ReadEn=%b | a3=%b (%0d) | out_wd=%h | alu_out=%h",
+        dut.I0.WriteEn, dut.I0.RegWriteBar, dut.I0.ReadEn,
+        dut.I0.a3, dut.I0.a3, dut.I0.out_wd, dut.I0.alu_out);
+    $display("  SRAM_clkpos=%b srclkpos=%b | Mclk=%b clkpos[6]=%b",
+        SRAM_clkpos, dut.I0.srclkpos, Mclk, clkpos[6]);
+    $display("  ALU ctrl0=%b ctrl1=%b cin=%b | a_muxout=%h b_muxout=%h a_inv=%h b_inv=%h adder_out=%h alu_muxout=%h",
+        dut.I0.I4.ALU_Control0, dut.I0.I4.ALU_Control1, dut.I0.I4.Adder_Cin,
+        dut.I0.I4.a_muxout, dut.I0.I4.b_muxout,
+        dut.I0.I4.a_invout, dut.I0.I4.b_invout,
+        dut.I0.I4.adder_out, dut.I0.I4.alu_muxout);
+    $display("  Bmux0=%b Bmux1=%b Amux=%b SUB=%b STL=%b a_reg=%h b_reg=%h",
+        dut.I0.I4.B_mux0, dut.I0.I4.B_mux1, dut.I0.I4.A_mux,
+        dut.I0.I4.SUB, dut.I0.I4.STL,
+        dut.I0.I4.a_regout, dut.I0.I4.b_regout);
+end
+
+// SRAM dump (non-zero registers only)
 task display_sram;
     input string label;
     integer j;
     begin
         $display("\n============================================");
-        $display(" SRAM Register File Peek: %s", label);
-        $display(" Time = %0t ns", $time);
+        $display(" SRAM Register File: %s (Time=%0t)", label, $time);
         $display("============================================");
-        for (j = 0; j < 32; j = j + 1) begin
+        for (j = 0; j < 32; j = j + 1)
             if (dut.I0.I24.array.sram[j] !== 16'h0000)
-                $display("  Reg[%2d] = %h (%0d)", j, dut.I0.I24.array.sram[j], dut.I0.I24.array.sram[j]);
-        end
-        $display("  (registers with value 0 omitted)");
+                $display("  Reg[%2d] = %h (%0d)", j,
+                    dut.I0.I24.array.sram[j],
+                    dut.I0.I24.array.sram[j]);
+        $display("  (zero-valued registers omitted)");
         $display("============================================\n");
     end
 endtask
 
-// Helper task: display full SRAM dump
+// Full SRAM dump
 task display_sram_full;
     input string label;
     integer j;
     begin
         $display("\n============================================");
-        $display(" SRAM Full Dump: %s", label);
-        $display(" Time = %0t ns", $time);
+        $display(" SRAM Full Dump: %s (Time=%0t)", label, $time);
         $display("============================================");
-        for (j = 0; j < 32; j = j + 1) begin
-            $display("  Reg[%2d] = %b (%h)", j, dut.I0.I24.array.sram[j], dut.I0.I24.array.sram[j]);
-        end
+        for (j = 0; j < 32; j = j + 1)
+            $display("  Reg[%2d] = %b (%h)", j,
+                dut.I0.I24.array.sram[j],
+                dut.I0.I24.array.sram[j]);
         $display("============================================\n");
     end
 endtask
 
-// Helper task: display behavioral InstrDataReg state
-task display_instr_state;
-    begin
-        $display("[%0t] InstrDataReg State: PC=%0d, phase=%b, instr_reg=%h",
-            $time,
-            dut.I0.I3.pc,
-            dut.I0.I3.phase,
-            dut.I0.I3.instr_reg);
-        $display("  -> out = %h, a3 = %0d, io = %h, out_wd = %h",
-            dut.I0.I3.out,
-            dut.I0.I3.a3,
-            dut.I0.I3.io,
-            dut.I0.I3.out_wd);
-    end
-endtask
-
-// Monitor key signals on each instruction cycle
-always @(posedge Fclk) begin
-    $display("-----------------------------------------------");
-    $display("[%0t] Instruction Cycle #%0d", $time, instr_cycle);
-    $display("  PC = %h, MemWrite = %b", PC, MemWrite);
-    $display("  OP5_spy = %b, OP3_spy = %b", OP5_spy, OP3_spy);
-    $display("  IRWr0 = %b, IRWr1 = %b", dut.I0.IRWr0, dut.I0.IRWr1);
-    $display("  InstrReg PC = %0d, instr = %h",
-        dut.I0.I3.pc, dut.I0.I3.instr_reg);
-end
-
+// =========================================================================
 // Main test sequence
-integer k;
+// =========================================================================
 initial begin
-    // Initialize inputs
-    Reset = 1;
-    in = 16'b0;
-    io_en = 0;
-    nand_in1 = 0;
-    nand_in2 = 0;
-    reset = 1;
-
     $display("========================================");
-    $display(" MIPS Processor Testbench");
-    $display(" Preloaded Instructions:");
-    $display("   [0] ADDI $1, $0, 5");
-    $display("   [1] ADDI $2, $0, 3");
-    $display("   [2] ADDI $3, $0, 10");
-    $display("   [3] ADDI $4, $0, 15");
-    $display("   [4] ADDI $5, $0, 7");
-    $display("   [5] ADDI $6, $0, 1");
+    $display(" MIPS Structural Testbench");
+    $display(" Instructions in testbench memory:");
+    $display("   [0] 20010005  ADDI $1, $0, 5");
+    $display("   [1] 20020003  ADDI $2, $0, 3");
+    $display("   [2] 2003000A  ADDI $3, $0, 10");
     $display("========================================\n");
 
-    // Pre-test: Full SRAM dump (should be all zeros)
+    // Initialise
+    Reset    = 1;
+    nand_in1 = 0;
+    nand_in2 = 0;
+    reset    = 1;          // hold Bennett clock in reset
+
     #1;
-    display_sram_full("BEFORE RESET");
+    $display("[%0t] DEBUG INIT: S=%b (%0d) | IRWr0=%b IRWr1=%b",
+        $time, fsm_state, fsm_state, dut.I0.IRWr0, dut.I0.IRWr1);
+    $display("[%0t] DEBUG INIT: out_MemWrite=%b MemWrite_chip=%b",
+        $time, dut.I0.I5.out_MemWrite, dut.MemWrite_chip);
 
-    // Release Bennett clock reset first, keep DUT Reset high
-    // so the FSM flip-flops latch the reset state on the first Fclk pulse.
-    // With WIDTH=11, one Bennett cycle ~220ns. Need Reset=1 when Fclk fires.
+    // ---- Release Bennett clock, keep DUT Reset high ----
     #50;
-    reset = 0;  // Start Bennett clock
-    $display("[%0t] Bennett clock reset released", $time);
+    reset = 0;
+    $display("[%0t] Bennett clock started", $time);
 
-    // Wait for 2 full Bennett cycles so Reset=1 is captured by Fclk
-    @(posedge Fclk);
-    @(negedge Fclk);
-    $display("[%0t] First Fclk pulse captured with Reset=1", $time);
-    @(posedge Fclk);
-    @(negedge Fclk);
-    $display("[%0t] Second Fclk pulse captured with Reset=1", $time);
+    // Wait 2 Fclk pulses with Reset=1 to flush FSM through reset path.
+    @(posedge Fclk); @(negedge Fclk);
+    $display("[%0t] 1st Fclk with Reset=1", $time);
+    @(posedge Fclk); @(negedge Fclk);
+    $display("[%0t] 2nd Fclk with Reset=1", $time);
 
-    // Now release DUT Reset
+    // ---- Release DUT Reset — processor starts executing ----
     Reset = 0;
     $display("[%0t] DUT Reset released", $time);
 
-    // DEBUG: trace clkpos and key signals for first ~500ns after reset
-    for (k = 0; k < 50; k = k + 1) begin
-        #10;
-        $display("[%0t] clkpos=%b clkneg=%b Fclk=%b Tclk=%b Mclk=%b instFlag=%b",
-            $time, clkpos, clkneg, Fclk, Tclk, Mclk, instFlag);
-        $display("       IRWr0=%b IRWr1=%b Reset=%b PC=%h MemWrite=%b",
-            dut.I0.IRWr0, dut.I0.IRWr1, Reset, PC, MemWrite);
-    end
+    // Run enough cycles for the 3 ADDI instructions.
+    // ADDI path: Fetch1→Fetch2→Decode→134→176→Fetch1 = 5 states per instruction.
+    // 3 instructions × 5 states = 15; add margin: run 60 cycles.
+    repeat (60) @(posedge Fclk);
 
-    // Peek at SRAM periodically
-    #2000;
-    display_sram("After initial run");
-    display_instr_state();
-
-    #5000;
-    display_sram("After more time");
-    display_instr_state();
-
-    #5000;
-    // Final SRAM dump
-    display_sram_full("FINAL STATE");
-    display_instr_state();
+    #1;
+    display_sram("AFTER PROGRAM");
+    display_sram_full("FULL DUMP");
 
     $display("\n========================================");
-    $display(" Simulation Complete");
-    $display(" Total instruction cycles: %0d", instr_cycle);
+    $display(" Expected: Reg[1]=0005, Reg[2]=0003, Reg[3]=000A");
+    $display(" Simulation complete — %0d Fclk cycles", instr_cycle);
     $display("========================================");
 
     $finish;

@@ -1,0 +1,193 @@
+# CU State Machine Diagnosis
+
+## Simulation Run Output (hex)
+
+```
+=== RESET PHASE ===
+  Reset cycle 1: S=00  Reset cycle 2: S=00
+=== R-Type OP (OP=4'b0100) ===
+  INIT -> Fetch1:    S=81   (expected FETCH1  = 81) ✓
+  Fetch1 -> Fetch2:  S=89   (expected FETCH2  = 89) ✓
+  Fetch2 -> Decode:  S=83   (expected DECODE  = 83) ✓
+  Decode -> RTYPEX:  S=86   (expected RTYPEX  = CC) ✗  got MEMADR
+  RTYPEX -> RTYPEWR: S=b0   (expected RTYPEWR = A0) ✗  got ADDIWR
+  Back to Fetch1:    S=81   ✓
+=== LOAD (OP=4'b1000) ===
+  (all transitions correct — FETCH1→FETCH2→DECODE→MEMADR→LBRD→LBWR→FETCH1)
+=== STORE (OP=4'b1100) ===
+  (all transitions correct — DECODE→MEMADR→SBWR→FETCH1, labels off-by-one)
+=== BEQ (OP=4'b0010) ===
+  (correct — DECODE→BEQEX→FETCH1, labels off due to accumulated offset)
+=== JUMP (OP=4'b0001) ===
+  (correct — DECODE→JEX→FETCH1) ✓
+=== ADDI (OP=4'b0100) ===
+  Fetch2 -> Decode:  S=83   ✓
+  Decode -> ADDIEX:  S=86   (expected ADDIEX = 8E) ✗  got MEMADR
+  ADDIEX -> ADDIWR:  S=b0   (expected ADDIWR = B0) ✓ value but via wrong path
+  Back to Fetch1:    S=81   ✓
+```
+
+---
+
+## Actual State Machine vs Spec
+
+| Transition | Spec | Simulation | Status |
+|---|---|---|---|
+| INIT → FETCH1 | 00 → 81 | 00 → 81 | ✓ |
+| FETCH1 → FETCH2 | 81 → 89 | 81 → 89 | ✓ |
+| FETCH2 → DECODE | 89 → 83 | 89 → 83 | ✓ |
+| DECODE → RTYPEX (R-type) | 83 → CC | never reached | ✗ |
+| DECODE → ADDIEX (ADDI) | 83 → 8E | 83 → 86 (MEMADR) | ✗ |
+| DECODE → MEMADR (LB/SB) | 83 → 86 | 83 → 86 | ✓ |
+| DECODE → BEQEX | 83 → 04 | 83 → 04 | ✓ |
+| DECODE → JEX | 83 → A8 | 83 → A8 | ✓ |
+| MEMADR → LBRD | 86 → 88 | 86 → 88 | ✓ |
+| MEMADR → SBWR | 86 → 98 | 86 → 98 | ✓ |
+| MEMADR → ADDIWR (bug) | N/A | 86 → B0 | ✗ |
+| LBRD → LBWR | 88 → 90 | 88 → 90 | ✓ |
+| LBWR → FETCH1 | 90 → 81 | 90 → 81 | ✓ |
+| SBWR → FETCH1 | 98 → 81 | 98 → 81 | ✓ |
+| RTYPEX → RTYPEWR | CC → A0 | never reached | ✗ |
+| BEQEX → FETCH1 | 04 → 81 | 04 → 81 | ✓ |
+| JEX → FETCH1 | A8 → 81 | A8 → 81 | ✓ |
+| ADDIEX → ADDIWR | 8E → B0 | never reached | ✗ |
+| ADDIWR → FETCH1 | B0 → 81 | B0 → 81 | ✓ |
+
+**States never entered:** RTYPEX (CC), RTYPEWR (A0), ADDIEX (8E).
+
+---
+
+## Issue 1: Testbench OP Encoding is Wrong for R-Type
+
+**File:** `tb/CU/CU_tb.sv`
+
+The testbench sets `OP = 4'b0100` for the "R-type" test section (line 100) and then
+again uses the exact same value `OP = 4'b0100` for the ADDI section (line 194).
+These are identical — the R-type test is never actually testing R-type.
+
+The OP bit mapping used in the testbench is (lines 76–79):
+
+```
+OP1 = OP[0]
+OP2 = OP[1]
+OP3 = OP[2]
+OP5 = OP[3]
+```
+
+With `OP = 4'b0100`, this gives `OP3 = 1`, `all others = 0`.
+
+R-type detection in the netlist (`control_unit.sv` line 251):
+
+```verilog
+nor4b I27 ( out_Rtype, OP5, OP3, OP2, clkneg[0], clkpos[0], OP1, vdd, vss);
+// out_Rtype = NOR(OP5, OP3, OP2, OP1)
+```
+
+For `out_Rtype = 1`, all four OP bits must be 0. With `OP3 = 1`, `out_Rtype = 0`.
+**True R-type encoding is `OP = 4'b0000` (all zeros).** The testbench never drives this.
+As a result, RTYPEX and RTYPEWR are unreachable during the entire simulation.
+
+---
+
+## Issue 2: ADDI Routes to MEMADR Instead of ADDIEX
+
+**Root cause in:** `control_unit.sv`
+
+ADDIEX = `0x8E = 10001110`. Compared to MEMADR = `0x86 = 10000110`, the only difference
+is **bit S[4]** — ADDIEX requires `S[4] = 1`, MEMADR does not.
+
+`S[4]` is clocked in from `Nout[4]`. Nout[4] is driven by this chain:
+
+```
+control_unit.sv:86  mux2to1_control I116 ( Nout[4], net299, ... )
+control_unit.sv:171 inv I109 ( net299, clkneg[5], clkpos[5], net224, ... )
+control_unit.sv:204 nor2b I105 ( net224, out_lbrd, out_other4, clkneg[4], ... )
+```
+
+`Nout[4] = out_lbrd OR out_other4`
+
+`out_other4` is defined as (line 210):
+
+```
+control_unit.sv:210 nor2b I95 ( out_other4, net319, net249, ... )
+control_unit.sv:176 inv I76  ( net319, clkneg[2], clkpos[2], out_Memadr, ... )  → net319 = ~out_Memadr
+control_unit.sv:215 nor2b I77 ( net249, out_Addi, out_SB, ... )                 → net249 = NOR(out_Addi, out_SB)
+```
+
+Expanding: `out_other4 = NOR(~out_Memadr, NOR(out_Addi, out_SB))`
+                       `= out_Memadr AND (out_Addi OR out_SB)`
+
+**When transitioning from DECODE (out_Memadr = 0), `out_other4 = 0` always.**
+
+`out_lbrd` is driven from (lines 174, 242, 255):
+
+```
+control_unit.sv:174 inv I94 ( out_lbrd, clkneg[3], clkpos[3], net409, ... )
+control_unit.sv:242 nand2b I75 ( net409, net466, net410, ... )
+control_unit.sv:255 nor3b I48 ( net466, out_S5, out_S6, out_S4, ... )
+```
+
+`out_lbrd = 1` requires `net466 = 1` (i.e., `S[4]=0, S[5]=0, S[6]=0`) AND `net410 = 1`.
+In DECODE state (83: `S[6]=1`), `net466 = NOR(..., S[6]=1, ...) = 0`, so `out_lbrd = 0`.
+
+**Conclusion:** Neither `out_lbrd` nor `out_other4` is ever 1 when transitioning out of
+DECODE. `Nout[4]` stays 0, so the next state cannot be ADDIEX (which needs `S[4]=1`).
+There is no gate in the Nout[4] cone that fires on `(out_Addi AND out_Decode)`.
+
+The machine falls through to MEMADR (0x86) because the MEMADR bits (S[5] and S[6])
+are generated by other paths that remain active.
+
+---
+
+## Issue 3: MEMADR → ADDIWR When ADDI OP is Active
+
+Because Issue 2 causes ADDI to land in MEMADR, the circuit now sees
+`out_Memadr = 1` AND `out_Addi = 1` simultaneously. This triggers `out_other4 = 1`
+(per the formula above — `out_Memadr AND (out_Addi OR out_SB)`), which sets `Nout[4] = 1`
+on the next cycle. This pulls the machine toward ADDIWR (B0) rather than LBRD (88)
+or SBWR (98), since the LB/SB detection is also 0 with ADDI op:
+
+```
+control_unit.sv:227 nor2b I45 ( out_LB, net67, OP3, ... )
+control_unit.sv:223 nor2b I50 ( out_SB, net53, net62, ... )
+```
+
+The path `MEMADR → ADDIWR` does not exist in the spec. It is an artifact of
+Issue 2 routing ADDI through MEMADR.
+
+The gate that should gate MEMADR to LBRD/SBWR is:
+
+```
+control_unit.sv:238 nand2b I79 ( net399, out_Addi, out_Memadr, ... )
+```
+
+net399 drives `Nout[5]` via `nand3b I129` (line 111). When `out_Addi = 1` AND
+`out_Memadr = 1`, `net399 = 0`, which forces `Nout[5]` high regardless of other
+inputs. This is what pushes the machine out of the MEMADR→LBRD/SBWR path.
+
+---
+
+## Issue 4: Test Label Misalignment (BEQ/STORE sections)
+
+The LOAD test consumes one extra instruction flag after LBWR→FETCH1 ("Back to Fetch1"
+actually advances to FETCH2=89, not staying at FETCH1=81). As a result:
+
+- STORE test starts from **FETCH2** (not FETCH1), so all labels in that section are
+  shifted by one state.
+- BEQ test starts from **DECODE** (not FETCH1), so labels are shifted by two states.
+
+The store and BEQ paths themselves transition correctly; only the testbench labels
+are misaligned. The JUMP test re-aligns because the BEQ section happens to loop
+back to BEQEX, and the JUMP section starts from BEQEX (unconditional BEQEX→FETCH1
+gets it back on track).
+
+---
+
+## Summary of Root Causes
+
+| # | Problem | Location |
+|---|---|---|
+| 1 | OP=4'b0100 used for R-type test — `out_Rtype` is never 1, RTYPEX/RTYPEWR unreachable | `CU_tb.sv:100`, `control_unit.sv:251` |
+| 2 | No gate drives `Nout[4]` from (DECODE AND ADDI) — ADDIEX (8E) never entered | `control_unit.sv:86,171,204,210` |
+| 3 | ADDI landing in MEMADR triggers `out_other4`, routing to ADDIWR via wrong path | `control_unit.sv:238,210,204` |
+| 4 | Test label offset accumulated from LOAD extra step — BEQ/STORE labels misaligned | `CU_tb.sv:131-161` |
