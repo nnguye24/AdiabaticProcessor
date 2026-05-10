@@ -102,13 +102,10 @@ These bugs are documented in detail in [`cu_diagnosis.md`](cu_diagnosis.md):
 3. **Secondary mis-routing** — Because ADDI lands in `MEMADR`, the circuit sees `out_Memadr AND out_Addi` simultaneously, which drives `out_other4` and incorrectly routes the machine to `ADDIWR` via a path that does not exist in the spec.
 
 ### Suggested contributions
+- **Diagnose the bad transistions between states in CU** 
+- **Phase detection circuit may be wrong in the CU**
+- **There are some CU timings that were off, I believe they had to do with the Instruction Register Reading and Writing**
 
-- **Fix the CU testbench** — correct the R-type OP encoding in `CU_tb.sv` and add assertions for each FSM state transition.
-- **Fix `control_unit.sv`** — add the missing `Nout[4]` logic so `ADDIEX` is reachable from `DECODE` when the ADDI op is active.
-- **Add a full instruction-level MIPS testbench** — `tb/mips/top_tb.sv` is a start, but a self-checking test that loads a small program and verifies register/memory results would be a major step forward.
-- **Document the cell library** — `modules/` has 25+ adiabatic gate primitives with no descriptions. Even a one-line comment per module (function, drive strength, `_irr` vs non-`_irr` variant) would help a lot.
-- **Add waveform screenshots** — capture GTKWave screenshots of passing simulations and add them to `Adiabatic Docs/` so future readers can see expected behavior without running a simulation.
-- **Write a simulation guide** — note any quirks with Icarus Verilog and the `inout`/`supply` port conventions used throughout the netlists (the switch from `netlist.sv` to `netlist_pad.sv` and `netlist_updated.sv` could use explanation).
 
 ## Note for Undergrads
 
