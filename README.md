@@ -145,13 +145,15 @@ Verification is honestly hell the way we do it in the Snider/Orlov lab. It's sup
 Here's a gap I think we have. We have adiabatic standard cell layouts. We don't have RTL for them. So probably characterize each standard cell to generate a behavioral RTL model that models the cell's behavior accurately. In verification, we can use this behavioral RTL model because we trust that it models the logical behavior or the physical layout accurately.
 
 But now how do we write RTL where synthesis can pattern match and substitute standard cell behavioral logic to it? What does Adiabatic RTL even look like? For Bennett Clocking this might be hell because we won't know how many bennett phases a design may need without laying down on schematic. Maybe it doesn't have to look different. Here are some more thoughts:
-```
+___
+
 A tool would know how many bennett phases each standard cell takes in. Connects them together according to what patterns it sees in RTL.
 
 If we write normal RTL(ie. with one periodic clock), a synthesis tool could treat bennett phases as another set of pins and probably piece together standard cells arbitrarily. The number of bennett phases would be calculated by adding up the number of phases on each gate on the longest logical path from input to output. 
 
-In this sense, verification could just be on normal RTL(square wave clock). A synthesis tool would infer bennett phases by the process described above. And synthesis output would have more pins(from bennett clocks) than what was inputted to the tool. 
-```
+In this sense, verification could just be on normal RTL(square wave clock). A synthesis tool would infer bennett phases by the process described above. And synthesis output would have more pins(from 
+bennett clocks) than what was inputted to the tool. 
+___
 
 Even doing this doesn't feel right though... We'll have to do post-synthesis verification to confirm that our design is logically adiabatic. 
 
