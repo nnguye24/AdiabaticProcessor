@@ -53,11 +53,11 @@ AdiabaticProcessor/
 The processor is a **multi-cycle MIPS** design built entirely from adiabatic (energy-recovering) logic gates. Clocking is provided by a **Bennett clock** that generates overlapping trapezoidal/square-wave phases, enabling reversible charge transfer between pipeline stages.
 
 Key components:
-- **Bennett Clock** — generates 10-phase overlapping clock signals (`clkpos[0:9]`) plus a master clock (`Mclk`) and instruction flag (`instFlag`/`Fclk`).
-- **Control Unit** — FSM-based multicycle controller with states: Fetch1, Fetch2, Decode, and instruction-specific execute/writeback states (R-type, ADDI, Load, Store, BEQ, Jump).
+- **Bennett Clock** — generates X-phase overlapping clock signals (`clkpos[0:X]`) plus a master clock (`Mclk`) and instruction flag (`instFlag`/`Fclk`). The number of phases is parametrized in the module.
+- **Control Unit** — FSM-based multicycle controller with states: Fetch1, Fetch2, Decode, and instruction-specific execute/writeback states (R-type, ADDI, Load, Store, BEQ, Jump). States are described Adiabatic Docs/statemachine.png
 - **Datapath** — 16-bit data path with PC, instruction register, register file (SRAM-based), ALU, and memory interface.
 - **SRAM Bank** — 32x16-bit register file using a 2-port SRAM array with address decoders and write drivers.
-- **Custom Tranif** — pass-transistor primitive (`ctranif0`/`ctranif1`) used throughout the structural netlists.
+- **Custom Tranif** — custom pass-transistor primitive (`ctranif0`/`ctranif1`) used throughout the structural netlists.
 
 ## Building and Running
 
